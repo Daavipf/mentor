@@ -5,7 +5,12 @@ async function fetchData() {
 }
 
 export default function Menu() {
-  const data = fetchData().catch;
+  let data: Promise<string>;
+  const response = fetchData()
+    .then((data) => data)
+    .catch((err) => (data = err.message));
+
+  data = response;
   return (
     <div>
       <h1>Menu</h1>

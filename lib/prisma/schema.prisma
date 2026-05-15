@@ -5,15 +5,69 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "./lib/prisma"
+  output   = "./prisma"
 }
 
 datasource db {
   provider = "sqlite"
 }
 
-model User {
-  id Int @id @default(autoincrement())
-  email String @unique
-  name String
+model Users {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  name      String
+  exams     Exams[]
+  histories History[]
+}
+
+model Questions {
+  id           String             @id @default(uuid())
+  text         String
+  discipline   String
+  year         Int
+  image        String?
+  alternatives Alternatives[]
+  exams        QuestionsOnExams[]
+}
+
+model Alternatives {
+  id              String             @id @default(uuid())
+  question        Questions          @relation(fields: [questionId], references: [id])
+  questionId      String
+  text            String
+  isCorrect       Boolean
+  selectedInExams QuestionsOnExams[]
+}
+
+model Exams {
+  id         String             @id @default(uuid())
+  user       Users              @relation(fields: [userId], references: [id])
+  userId     String
+  discipline String
+  date       DateTime
+  questions  QuestionsOnExams[]
+  histories  History[]
+}
+
+model QuestionsOnExams {
+  question        Questions    @relation(fields: [questionId], references: [id])
+  questionId      String
+  exam            Exams        @relation(fields: [examId], references: [id])
+  examId          String
+  gotRight        Boolean
+  userAlternative Alternatives @relation(fields: [alternativeId], references: [id])
+  alternativeId   String
+
+  @@id([questionId, examId])
+}
+
+model History {
+  id         String   @id @default(uuid())
+  user       Users    @relation(fields: [userId], references: [id])
+  userId     String
+  exam       Exams    @relation(fields: [examId], references: [id])
+  examId     String
+  finishedAt DateTime @default(now())
+  score      Int?
 }

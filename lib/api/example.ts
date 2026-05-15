@@ -12,10 +12,10 @@ async function createUser() {
 }
 
 export async function example() {
-  await createUser();
+  //await createUser();
 
   const data = await prisma.user.findFirst({
-    where: { email: "skuki@emi.com" },
+    where: { email: "suki@emi.com" },
   });
 
   if (!data) throw Error("Não encontrado");
