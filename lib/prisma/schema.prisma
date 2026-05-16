@@ -22,22 +22,34 @@ model Users {
 }
 
 model Questions {
-  id           String             @id @default(uuid())
-  text         String
-  discipline   String
-  year         Int
-  image        String?
-  alternatives Alternatives[]
-  exams        QuestionsOnExams[]
+  id                       String             @id @default(uuid())
+  context                  String?
+  alternativesIntroduction String?
+  discipline               String
+  year                     Int
+  images                   QuestionImages[]
+  language                 String?
+  index                    Int
+  title                    String?
+  alternatives             Alternatives[]
+  exams                    QuestionsOnExams[]
+}
+
+model QuestionImages {
+  id         String    @id @default(uuid())
+  question   Questions @relation(fields: [questionId], references: [id])
+  questionId String
+  path       String
 }
 
 model Alternatives {
   id              String             @id @default(uuid())
   question        Questions          @relation(fields: [questionId], references: [id])
   questionId      String
-  text            String
+  text            String?
   isCorrect       Boolean
   selectedInExams QuestionsOnExams[]
+  imagePath       String?
 }
 
 model Exams {
