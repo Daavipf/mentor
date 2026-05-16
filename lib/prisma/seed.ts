@@ -37,10 +37,12 @@ async function main() {
 
   for (let year = YEAR_START; year <= YEAR_END; year++) {
     const response = await fetchQuestions(year);
-    const englishResponse = await fetchQuestions(year, "ingles");
-
     data[year] = response.questions;
-    data[year].splice(5, 5, ...englishResponse.questions);
+
+    if (year >= 2017) {
+      const englishResponse = await fetchQuestions(year, "ingles");
+      data[year] = [...data[year], ...englishResponse.questions];
+    }
   }
 
   //console.dir(data, { depth: null });
@@ -95,18 +97,15 @@ async function fetchQuestions(
   year: number,
   language?: "ingles" | "espanhol",
 ): Promise<APIResponse> {
-  let response = await fetch(
-    `${enemApiBaseUrl}/exams/${year}/questions?limit=${LIMIT}`,
-  );
+  let url = `${enemApiBaseUrl}/exams/${year}/questions?limit=${LIMIT}`;
 
   if (language) {
     if (year >= 2017) {
-      response = await fetch(
-        `${enemApiBaseUrl}/exams/${year}/questions?limit=5&language=${language}`,
-      );
+      url = `${enemApiBaseUrl}/exams/${year}/questions?limit=5&language=${language}`;
     }
   }
 
+  const response = await fetch(url);
   if (!response.ok) {
     throw new Error(
       `Erro ao buscar questões do ano ${year}: ${response.statusText}`,
