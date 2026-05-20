@@ -1,9 +1,14 @@
 import "dotenv/config";
 import { prisma } from "@/lib/prisma/prisma";
-import { PrismaClient, Prisma } from "./prisma/client";
+import { Prisma } from "./prisma/client";
 
 type APIResponse = {
-  metadata: any;
+  metadata: {
+    limit: number;
+    offset: number;
+    total: number;
+    hasMore: boolean;
+  };
   questions: Question[];
 };
 
@@ -51,19 +56,14 @@ async function main() {
     //console.dir(data[year], { depth: null });
     const questions = data[year];
 
-    console.log(
-      `Iniciando inserção de ${questions.length} questões do ano ${year}...`,
-    );
+    console.log(`Iniciando inserção de ${questions.length} questões do ano ${year}...`);
 
     for (let question of questions) {
       try {
         const questionPayload = mapQuestionPayload(question);
         await prisma.questions.create({ data: questionPayload });
       } catch (error) {
-        console.error(
-          `Erro ao inserir a questão index ${question.index} do ano ${year}:`,
-          error,
-        );
+        console.error(`Erro ao inserir a questão index ${question.index} do ano ${year}:`, error);
       }
     }
   }
@@ -71,7 +71,7 @@ async function main() {
 
 function mapQuestionPayload(question: Question): Prisma.QuestionsCreateInput {
   return {
-    discipline: question.discipline,
+    area: question.discipline,
     index: question.index,
     context: question.context,
     alternativesIntroduction: question.alternativesIntroduction,
@@ -93,10 +93,7 @@ function mapQuestionPayload(question: Question): Prisma.QuestionsCreateInput {
   };
 }
 
-async function fetchQuestions(
-  year: number,
-  language?: "ingles" | "espanhol",
-): Promise<APIResponse> {
+async function fetchQuestions(year: number, language?: "ingles" | "espanhol"): Promise<APIResponse> {
   let url = `${enemApiBaseUrl}/exams/${year}/questions?limit=${LIMIT}`;
 
   if (language) {
@@ -107,9 +104,7 @@ async function fetchQuestions(
 
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(
-      `Erro ao buscar questões do ano ${year}: ${response.statusText}`,
-    );
+    throw new Error(`Erro ao buscar questões do ano ${year}: ${response.statusText}`);
   }
 
   return await response.json();
