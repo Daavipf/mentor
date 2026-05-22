@@ -8,7 +8,7 @@ export default async function DashboardPage() {
   const user = token ? verifyJwt(token) : null;
 
   return (
-    <main style={{ padding: "40px" }}>
+    <section style={{ padding: "40px" }}>
       <h1>Dashboard Privado</h1>
       <p>
         Bem-vindo, <strong>{user?.name}</strong>!
@@ -17,6 +17,6 @@ export default async function DashboardPage() {
       <form action={handleLogout} style={{ marginTop: "20px" }}>
         <button type="submit">Sair da Conta</button>
       </form>
-    </main>
+    </section>
   );
 }
