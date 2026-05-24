@@ -10,7 +10,7 @@ const questionsRepository = new QuestionsRepository(prisma);
 const examsRepository = new ExamsRepository(prisma, questionsRepository);
 const usersRepository = new UsersRepository(prisma);
 
-const examsService = new ExamsService(examsRepository);
+const examsService = new ExamsService(examsRepository, questionsRepository);
 
 const authService = new AuthService(usersRepository);
 

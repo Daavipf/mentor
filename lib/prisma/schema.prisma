@@ -65,20 +65,27 @@ model Exams {
   id        String             @id @default(uuid())
   user      Users              @relation(fields: [userId], references: [id])
   userId    String
-  area      String
+  areas     ExamAreas[]
   date      DateTime
   questions QuestionsOnExams[]
   histories History[]
 }
 
+model ExamAreas {
+  id      String  @id @default(uuid())
+  exams   Exams?  @relation(fields: [examsId], references: [id])
+  examsId String?
+  area    String
+}
+
 model QuestionsOnExams {
-  question        Questions     @relation(fields: [questionId], references: [id])
-  questionId      String
-  exam            Exams         @relation(fields: [examId], references: [id])
-  examId          String
-  gotRight        Boolean?
-  userAlternative Alternatives? @relation(fields: [alternativeId], references: [id])
-  alternativeId   String?
+  question              Questions     @relation(fields: [questionId], references: [id])
+  questionId            String
+  exam                  Exams         @relation(fields: [examId], references: [id])
+  examId                String
+  gotRight              Boolean?
+  userAlternative       Alternatives? @relation(fields: [selectedAlternativeId], references: [id])
+  selectedAlternativeId String?
 
   @@id([questionId, examId])
 }

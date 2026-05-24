@@ -8,14 +8,26 @@ export default class QuestionsRepository implements IQuestionsRepository {
     this.prisma = prismaClient;
   }
 
-  async getRandomQuestions(amount: number, area: string): Promise<Prisma.QuestionsModel[]> {
-    const shuffledIds = await this.getAllIds(amount, area);
+  async getRandomQuestions(amount: number, area: string, language: string | null): Promise<Prisma.QuestionsModel[]> {
+    const shuffledIds = await this.getAllIds(amount, area, language);
 
     return this.prisma.questions.findMany({
       where: {
         id: { in: shuffledIds },
       },
     });
+  }
+
+  private async getAllIds(amount: number, area: string, language: string | null): Promise<string[]> {
+    const allIds = await this.prisma.questions.findMany({
+      where: { area: area, language: language },
+      select: { id: true },
+    });
+
+    return allIds
+      .map((item) => item.id)
+      .sort(() => 0.5 - Math.random())
+      .slice(0, amount);
   }
 
   async linkQuestionsToExam(
@@ -44,28 +56,8 @@ export default class QuestionsRepository implements IQuestionsRepository {
   }
 
   async getMultipleQuestionsAlternatives(questionsId: string[]): Promise<Prisma.AlternativesModel[]> {
-    let alternatives: Prisma.AlternativesModel[] = [];
-
-    for (const questionId of questionsId) {
-      const a = await this.prisma.alternatives.findMany({
-        where: { questionId: questionId },
-      });
-
-      alternatives = [...alternatives, ...a];
-    }
-
-    return alternatives;
-  }
-
-  private async getAllIds(amount: number, area: string): Promise<string[]> {
-    const allIds = await this.prisma.questions.findMany({
-      where: { area: area },
-      select: { id: true },
+    return this.prisma.alternatives.findMany({
+      where: { questionId: { in: questionsId } },
     });
-
-    return allIds
-      .map((item) => item.id)
-      .sort(() => 0.5 - Math.random())
-      .slice(0, amount);
   }
 }
