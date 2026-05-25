@@ -1,9 +1,10 @@
 import { Prisma } from "@/lib/prisma/prisma/client";
-import { AnswerPayload } from "../types/AnswerPayload";
-import { ExamDTO } from "../types/ExamDTO";
-import { QuestionDTO } from "../types/QuestionDTO";
+import { AnswerPayload } from "@/lib/api/types/AnswerPayload";
+import { ExamDTO, ExamResultsDTO } from "@/lib/api/types/ExamDTO";
+import { QuestionDTO } from "@/lib/api/types/QuestionDTO";
 import { IExamsRepository, IExamsService } from "./interface";
 import { IQuestionsRepository } from "../questions/interface";
+import { IAlternative } from "@/lib/api/types/AlternativeDTO";
 
 export default class ExamsService implements IExamsService {
   examsRepository: IExamsRepository;
@@ -54,6 +55,25 @@ export default class ExamsService implements IExamsService {
     };
   }
 
+  async getExamResults(id: string): Promise<ExamDTO> {
+    const exam = await this.examsRepository.getExam(id);
+    if (!exam) throw new Error("Prova não encontada");
+
+    const questions = await this.examsRepository.getExamQuestions(exam.id);
+    const questionsIds = questions.map((q) => q.id);
+    const alternatives = await this.questionsRepository.getMultipleQuestionsAlternatives(questionsIds);
+    const examAreas = await this.examsRepository.getExamAreas(exam.id);
+    const questionsDTO: QuestionDTO[] = this.mapQuestionsToDTO(questions, alternatives, true);
+
+    return {
+      id: exam.id,
+      areas: examAreas.map((a) => a.area),
+      date: exam.date,
+      questions: questionsDTO,
+      userId: exam.userId,
+    };
+  }
+
   async submitExam(examId: string, userId: string, answer: AnswerPayload[]): Promise<number> {
     try {
       const score = await this.examsRepository.submitExam(examId, userId, answer)
@@ -67,6 +87,7 @@ export default class ExamsService implements IExamsService {
   private mapQuestionsToDTO(
     questions: Prisma.QuestionsModel[],
     alternatives: Prisma.AlternativesModel[],
+    includeResults: boolean = false
   ): QuestionDTO[] {
     return questions.map((q) => {
       const qAlternatives = alternatives.filter((a) => a.questionId === q.id);
@@ -80,11 +101,20 @@ export default class ExamsService implements IExamsService {
         index: q.index,
         language: q.language,
         title: q.title,
-        alternatives: qAlternatives.map((alt) => ({
-          id: alt.id,
-          text: alt.text,
-          file: alt.imagePath,
-        })),
+        alternatives: qAlternatives.map((alt) => {
+          const baseAlternative: any = {
+            id: alt.id,
+            text: alt.text,
+            file: alt.imagePath,
+          }
+
+          if(includeResults){
+            baseAlternative.isCorrect = alt.isCorrect
+          }
+
+          return baseAlternative
+          
+        }),
       };
     });
   }

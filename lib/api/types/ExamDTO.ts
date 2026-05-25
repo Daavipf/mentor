@@ -1,4 +1,4 @@
-import { QuestionDTO } from "./QuestionDTO";
+import { QuestionDTO, QuestionResultDTO } from "./QuestionDTO";
 
 export type ExamDTO = {
   id: string;
@@ -7,3 +7,7 @@ export type ExamDTO = {
   userId: string;
   questions: QuestionDTO[];
 };
+
+export interface ExamResultsDTO extends Omit<ExamDTO, 'questions'>{
+  questions: QuestionResultDTO[]
+}

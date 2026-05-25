@@ -1,4 +1,4 @@
-import { AlternativeDTO } from "./AlternativeDTO";
+import { AlternativeComplete, IAlternative } from "./AlternativeDTO";
 
 export type QuestionDTO = {
   id: string;
@@ -9,5 +9,9 @@ export type QuestionDTO = {
   year: number;
   context: string | null;
   alternativesIntroduction: string | null;
-  alternatives: AlternativeDTO[];
+  alternatives: IAlternative[];
 };
+
+export interface QuestionResultDTO extends Omit<QuestionDTO, 'alternatives'>{
+  alternatives: AlternativeComplete[]
+}

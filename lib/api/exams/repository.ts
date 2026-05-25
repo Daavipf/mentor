@@ -1,7 +1,7 @@
 import { Prisma, PrismaClient } from "@/lib/prisma/prisma/client";
 import { IQuestionsRepository } from "@/lib/api/questions/interface";
 import { IExamsRepository } from "./interface";
-import { AnswerPayload } from "../types/AnswerPayload";
+import { AnswerPayload } from "@/lib/api/types/AnswerPayload";
 
 export default class ExamsRepository implements IExamsRepository {
   prisma: PrismaClient;
@@ -125,6 +125,19 @@ export default class ExamsRepository implements IExamsRepository {
       throw new Error(error.message);
     }
   }
+
+  // async getExamQuestionsResults(examId: string): Promise<Prisma.QuestionsOnExamsModel[]> {
+  //   try {
+  //     const questionsOnExam = await this.prisma.questionsOnExams.findMany({
+  //       where: { examId },
+  //     });
+
+  //     return questionsOnExam;
+  //   } catch (error: any) {
+  //     console.error(error);
+  //     throw new Error(error.message);
+  //   }
+  // }
 
   async markQuestion(examId: string, questionId: string, alternativeId: string): Promise<Prisma.QuestionsModel | null> {
     try {
