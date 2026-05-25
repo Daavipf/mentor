@@ -8,6 +8,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
   const resolvedParams = await params;
   const examId = resolvedParams.id;
 
+  // QUESTION: precisa mesmo verificar a sessão aqui?
   // 1. Validação de usuário
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;

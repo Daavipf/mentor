@@ -55,7 +55,13 @@ export default class ExamsService implements IExamsService {
   }
 
   async submitExam(examId: string, userId: string, answer: AnswerPayload[]): Promise<number> {
-    return 0;
+    try {
+      const score = await this.examsRepository.submitExam(examId, userId, answer)
+      return score
+    } catch (error: any) {
+      console.error(error)
+      throw new Error(error.message)
+    }
   }
 
   private mapQuestionsToDTO(
