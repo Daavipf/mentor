@@ -55,7 +55,7 @@ export default class ExamsService implements IExamsService {
     };
   }
 
-  async getExamResults(id: string): Promise<ExamDTO> {
+  async getExamResults(id: string): Promise<[ExamDTO, Prisma.QuestionsOnExamsModel[]]> {
     const exam = await this.examsRepository.getExam(id);
     if (!exam) throw new Error("Prova não encontada");
 
@@ -65,13 +65,20 @@ export default class ExamsService implements IExamsService {
     const examAreas = await this.examsRepository.getExamAreas(exam.id);
     const questionsDTO: QuestionDTO[] = this.mapQuestionsToDTO(questions, alternatives, true);
 
-    return {
-      id: exam.id,
-      areas: examAreas.map((a) => a.area),
-      date: exam.date,
-      questions: questionsDTO,
-      userId: exam.userId,
-    };
+    // TODO: PEGAR AS QUESTÕES DESTA PROVA DE QuestionsOnExams e retornar para o
+    // front exibir as alternativas marcadas pelo usuário
+    const userSelectedAlternatives = await this.examsRepository.getExamQuestionsResults(exam.id);
+
+    return [
+      {
+        id: exam.id,
+        areas: examAreas.map((a) => a.area),
+        date: exam.date,
+        questions: questionsDTO,
+        userId: exam.userId,
+      },
+      userSelectedAlternatives,
+    ];
   }
 
   async submitExam(examId: string, userId: string, answer: AnswerPayload[]): Promise<number> {

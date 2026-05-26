@@ -126,18 +126,18 @@ export default class ExamsRepository implements IExamsRepository {
     }
   }
 
-  // async getExamQuestionsResults(examId: string): Promise<Prisma.QuestionsOnExamsModel[]> {
-  //   try {
-  //     const questionsOnExam = await this.prisma.questionsOnExams.findMany({
-  //       where: { examId },
-  //     });
+  async getExamQuestionsResults(examId: string): Promise<Prisma.QuestionsOnExamsModel[]> {
+    try {
+      const questionsOnExam = await this.prisma.questionsOnExams.findMany({
+        where: { examId },
+      });
 
-  //     return questionsOnExam;
-  //   } catch (error: any) {
-  //     console.error(error);
-  //     throw new Error(error.message);
-  //   }
-  // }
+      return questionsOnExam;
+    } catch (error: any) {
+      console.error(error);
+      throw new Error(error.message);
+    }
+  }
 
   async markQuestion(examId: string, questionId: string, alternativeId: string): Promise<Prisma.QuestionsModel | null> {
     try {
@@ -183,6 +183,7 @@ export default class ExamsRepository implements IExamsRepository {
         userId: userId,
         examId: examId,
         score: score,
+        finishedAt: new Date(),
       },
     });
 
