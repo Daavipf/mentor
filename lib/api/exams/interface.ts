@@ -14,12 +14,14 @@ export interface IExamsRepository {
   getExamAreas(examId: string): Promise<Prisma.ExamAreasModel[]>;
   markQuestion(examId: string, questionId: string, alternativeId: string): Promise<Prisma.QuestionsModel | null>;
   submitExam(examId: string, userId: string, answer: AnswerPayload[]): Promise<number>;
+  deleteExam(examId: string, userId: string): Promise<boolean>;
 }
 
 export interface IExamsService {
   createExam(examPayload: Record<string, number>, userId: string): Promise<ExamDTO>;
   getExam(id: string): Promise<ExamDTO>;
-  getExamResults(examId: string): Promise<ExamDTO>
+  getExamResults(examId: string): Promise<ExamDTO>;
   getUserExams(userId: string): Promise<Prisma.ExamsModel[]>;
   submitExam(examId: string, userId: string, answer: AnswerPayload[]): Promise<number>;
+  deleteExam(examId: string, userId: string): Promise<boolean>;
 }

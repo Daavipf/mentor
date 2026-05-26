@@ -39,21 +39,21 @@ model Questions {
 
 model QuestionTopics {
   id         String    @id @default(uuid())
-  question   Questions @relation(fields: [questionId], references: [id])
+  question   Questions @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId String
   topic      String
 }
 
 model QuestionImages {
   id         String    @id @default(uuid())
-  question   Questions @relation(fields: [questionId], references: [id])
+  question   Questions @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId String
   path       String
 }
 
 model Alternatives {
   id              String             @id @default(uuid())
-  question        Questions          @relation(fields: [questionId], references: [id])
+  question        Questions          @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId      String
   text            String?
   isCorrect       Boolean
@@ -73,15 +73,15 @@ model Exams {
 
 model ExamAreas {
   id      String  @id @default(uuid())
-  exams   Exams?  @relation(fields: [examsId], references: [id])
+  exams   Exams?  @relation(fields: [examsId], references: [id], onDelete: Cascade)
   examsId String?
   area    String
 }
 
 model QuestionsOnExams {
-  question              Questions     @relation(fields: [questionId], references: [id])
+  question              Questions     @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId            String
-  exam                  Exams         @relation(fields: [examId], references: [id])
+  exam                  Exams         @relation(fields: [examId], references: [id], onDelete: Cascade)
   examId                String
   gotRight              Boolean?
   userAlternative       Alternatives? @relation(fields: [selectedAlternativeId], references: [id])

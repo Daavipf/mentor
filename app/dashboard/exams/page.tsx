@@ -2,6 +2,8 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { verifyJwt } from "@/lib/api/auth/util";
 import { examsService } from "@/lib/api/main";
+import { Button } from "@/components/ui/button";
+import ConfirmDeleteDialog from "@/components/dialog/confirmDelete";
 
 export default async function ExamsListPage() {
   // 1. Pega e valida a sessão
@@ -20,6 +22,7 @@ export default async function ExamsListPage() {
   return (
     <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
       <h1>Minhas Provas</h1>
+      <Link href="/dashboard/exams/create">Nova Prova</Link>
 
       {exams.length === 0 ? (
         <p>Você ainda não gerou nenhuma prova.</p>
@@ -31,10 +34,12 @@ export default async function ExamsListPage() {
                 <strong>Prova ID:</strong> {exam.id}
                 {/* Se você tiver um campo de data, coloque aqui ex: {new Date(exam.createdAt).toLocaleDateString()} */}
               </Link>
+              <ConfirmDeleteDialog examId={exam.id} />
             </li>
           ))}
         </ul>
       )}
+      <Link href="/dashboard/">Voltar</Link>
     </div>
   );
 }

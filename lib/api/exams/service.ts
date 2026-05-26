@@ -76,18 +76,18 @@ export default class ExamsService implements IExamsService {
 
   async submitExam(examId: string, userId: string, answer: AnswerPayload[]): Promise<number> {
     try {
-      const score = await this.examsRepository.submitExam(examId, userId, answer)
-      return score
+      const score = await this.examsRepository.submitExam(examId, userId, answer);
+      return score;
     } catch (error: any) {
-      console.error(error)
-      throw new Error(error.message)
+      console.error(error);
+      throw new Error(error.message);
     }
   }
 
   private mapQuestionsToDTO(
     questions: Prisma.QuestionsModel[],
     alternatives: Prisma.AlternativesModel[],
-    includeResults: boolean = false
+    includeResults: boolean = false,
   ): QuestionDTO[] {
     return questions.map((q) => {
       const qAlternatives = alternatives.filter((a) => a.questionId === q.id);
@@ -106,16 +106,24 @@ export default class ExamsService implements IExamsService {
             id: alt.id,
             text: alt.text,
             file: alt.imagePath,
+          };
+
+          if (includeResults) {
+            baseAlternative.isCorrect = alt.isCorrect;
           }
 
-          if(includeResults){
-            baseAlternative.isCorrect = alt.isCorrect
-          }
-
-          return baseAlternative
-          
+          return baseAlternative;
         }),
       };
     });
+  }
+
+  async deleteExam(examId: string, userId: string): Promise<boolean> {
+    try {
+      return this.examsRepository.deleteExam(examId, userId);
+    } catch (error: any) {
+      console.error(error);
+      throw new Error(error.message);
+    }
   }
 }

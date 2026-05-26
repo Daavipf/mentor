@@ -194,4 +194,23 @@ export default class ExamsRepository implements IExamsRepository {
       throw new Error(error.message);
     }
   }
+
+  async deleteExam(examId: string, userId: string): Promise<boolean> {
+    try {
+      const exam = await this.prisma.exams.findFirst({
+        where: { id: examId },
+      });
+
+      if (!exam) throw new Error("Prova não encontrada");
+
+      if (userId !== exam.userId) throw new Error("Operação não auorizada");
+
+      const result = await this.prisma.exams.delete({ where: { id: examId } });
+
+      return result !== null;
+    } catch (error: any) {
+      console.error(error);
+      throw new Error(error.message);
+    }
+  }
 }
