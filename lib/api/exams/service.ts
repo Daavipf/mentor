@@ -1,18 +1,24 @@
 import { Prisma } from "@/lib/prisma/prisma/client";
 import { AnswerPayload } from "@/lib/api/types/AnswerPayload";
-import { ExamDTO, ExamResultsDTO } from "@/lib/api/types/ExamDTO";
+import { ExamDTO } from "@/lib/api/types/ExamDTO";
 import { QuestionDTO } from "@/lib/api/types/QuestionDTO";
 import { IExamsRepository, IExamsService } from "./interface";
-import { IQuestionsRepository } from "../questions/interface";
-import { IAlternative } from "@/lib/api/types/AlternativeDTO";
+import { IQuestionsRepository } from "@/lib/api/questions/interface";
+import { IHistoryRepository } from "@/lib/api/history/interface";
 
 export default class ExamsService implements IExamsService {
   examsRepository: IExamsRepository;
   questionsRepository: IQuestionsRepository;
+  historyRepository: IHistoryRepository;
 
-  constructor(examsRepository: IExamsRepository, questionsRepository: IQuestionsRepository) {
+  constructor(
+    examsRepository: IExamsRepository,
+    questionsRepository: IQuestionsRepository,
+    historyRepository: IHistoryRepository,
+  ) {
     this.examsRepository = examsRepository;
     this.questionsRepository = questionsRepository;
+    this.historyRepository = historyRepository;
   }
 
   async createExam(examPayload: Record<string, number>, userId: string): Promise<ExamDTO> {
@@ -65,8 +71,6 @@ export default class ExamsService implements IExamsService {
     const examAreas = await this.examsRepository.getExamAreas(exam.id);
     const questionsDTO: QuestionDTO[] = this.mapQuestionsToDTO(questions, alternatives, true);
 
-    // TODO: PEGAR AS QUESTÕES DESTA PROVA DE QuestionsOnExams e retornar para o
-    // front exibir as alternativas marcadas pelo usuário
     const userSelectedAlternatives = await this.examsRepository.getExamQuestionsResults(exam.id);
 
     return [
@@ -81,8 +85,23 @@ export default class ExamsService implements IExamsService {
     ];
   }
 
+  async isExamComplete(examId: string): Promise<boolean> {
+    try {
+      const examHistory = await this.historyRepository.getExamHistory(examId);
+      if (!examHistory) return false;
+
+      return examHistory.finishedAt < new Date();
+    } catch (error: any) {
+      console.error(error);
+      throw new Error(error.message);
+    }
+  }
+
   async submitExam(examId: string, userId: string, answer: AnswerPayload[]): Promise<number> {
     try {
+      const isComplete = await this.isExamComplete(examId);
+      if (isComplete) throw new Error("A prova já foi resolvida");
+
       const score = await this.examsRepository.submitExam(examId, userId, answer);
       return score;
     } catch (error: any) {

@@ -7,7 +7,7 @@ import ConfirmDeleteDialog from "@/components/dialog/confirmDelete";
 
 export default async function ExamsListPage() {
   // 1. Pega e valida a sessão
-  const cookieStore = await cookies(); // Use 'await' se estiver no Next.js 15
+  const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
   const payload = token ? verifyJwt(token) : null;
 
@@ -15,31 +15,101 @@ export default async function ExamsListPage() {
     return <div style={{ padding: "20px" }}>Houve um erro ao ver suas provas.</div>;
   }
 
-  // 2. Busca as provas do usuário
-  // Assuma que você vai criar um método parecido com esse no seu service
+  // 2. Busca a lista básica de provas do usuário
   const exams = await examsService.getUserExams(payload.userId);
+
+  // 3. Enriquece a lista com o status de conclusão resolvendo todas as Promises de uma vez
+  const examsWithStatus = await Promise.all(
+    exams.map(async (exam) => {
+      const isComplete = await examsService.isExamComplete(exam.id);
+      return { ...exam, isComplete };
+    }),
+  );
 
   return (
     <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
       <h1>Minhas Provas</h1>
-      <Link href="/dashboard/exams/create">Nova Prova</Link>
 
-      {exams.length === 0 ? (
+      <div style={{ marginBottom: "20px" }}>
+        <Link
+          href="/dashboard/exams/create"
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "#000",
+            color: "#fff",
+            textDecoration: "none",
+            borderRadius: "4px",
+          }}
+        >
+          Nova Prova
+        </Link>
+      </div>
+
+      {examsWithStatus.length === 0 ? (
         <p>Você ainda não gerou nenhuma prova.</p>
       ) : (
         <ul style={{ listStyleType: "none", padding: 0 }}>
-          {exams.map((exam) => (
-            <li key={exam.id} style={{ margin: "10px 0", padding: "10px", border: "1px solid #ccc" }}>
-              <Link href={`/dashboard/exams/${exam.id}`} style={{ textDecoration: "none", color: "blue" }}>
-                <strong>Prova ID:</strong> {exam.id}
-                {/* Se você tiver um campo de data, coloque aqui ex: {new Date(exam.createdAt).toLocaleDateString()} */}
-              </Link>
-              <ConfirmDeleteDialog examId={exam.id} />
-            </li>
-          ))}
+          {examsWithStatus.map((exam) => {
+            // Define a URL de destino com base no status de conclusão
+            const targetUrl = exam.isComplete
+              ? `/dashboard/exams/result/${exam.id}` // Link para ver os resultados
+              : `/dashboard/exams/${exam.id}`; // Link para responder a prova
+
+            return (
+              <li
+                key={exam.id}
+                style={{
+                  margin: "10px 0",
+                  padding: "15px",
+                  border: "1px solid #ccc",
+                  borderRadius: "8px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <Link
+                    href={targetUrl}
+                    style={{
+                      textDecoration: "none",
+                      color: "blue",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "5px",
+                    }}
+                  >
+                    <strong>Prova ID: {exam.id}</strong>
+
+                    {/* Indicador visual de status amigável para o usuário */}
+                    <span
+                      style={{
+                        fontSize: "12px",
+                        padding: "4px 8px",
+                        borderRadius: "12px",
+                        width: "fit-content",
+                        backgroundColor: exam.isComplete ? "#e6ffed" : "#fff3cd",
+                        color: exam.isComplete ? "#055016" : "#856404",
+                        border: `1px solid ${exam.isComplete ? "#2ea043" : "#ffeeba"}`,
+                      }}
+                    >
+                      {exam.isComplete ? "✓ Concluída (Ver Resultados)" : "⏳ Pendente (Continuar)"}
+                    </span>
+                  </Link>
+                </div>
+
+                <ConfirmDeleteDialog examId={exam.id} />
+              </li>
+            );
+          })}
         </ul>
       )}
-      <Link href="/dashboard/">Voltar</Link>
+
+      <div style={{ marginTop: "20px" }}>
+        <Link href="/dashboard/" style={{ color: "#555" }}>
+          &larr; Voltar
+        </Link>
+      </div>
     </div>
   );
 }

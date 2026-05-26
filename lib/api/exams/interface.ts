@@ -22,6 +22,7 @@ export interface IExamsService {
   getExam(id: string): Promise<ExamDTO>;
   getExamResults(examId: string): Promise<[ExamDTO, Prisma.QuestionsOnExamsModel[]]>;
   getUserExams(userId: string): Promise<Prisma.ExamsModel[]>;
+  isExamComplete(examId: string): Promise<boolean>;
   submitExam(examId: string, userId: string, answer: AnswerPayload[]): Promise<number>;
   deleteExam(examId: string, userId: string): Promise<boolean>;
 }

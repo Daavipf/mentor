@@ -4,6 +4,7 @@ import { examsService } from "@/lib/api/main";
 import Link from "next/link";
 import { ExamDTO } from "@/lib/api/types/ExamDTO";
 import ExamViewer from "@/components/exam/ExamViewer"; // Importando o Client Component
+import { redirect } from "next/navigation";
 
 export default async function ExamDetailPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
   const resolvedParams = await params;
@@ -16,6 +17,11 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
 
   if (!payload || !payload.userId) {
     return <div style={{ padding: "20px" }}>Houve um erro ao buscar a prova. Permissão negada.</div>;
+  }
+
+  const isComplete = await examsService.isExamComplete(examId);
+  if (isComplete) {
+    redirect(`/dashboard/exams/result/${examId}`);
   }
 
   // 2. Busca os detalhes da prova

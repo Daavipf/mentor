@@ -1,6 +1,7 @@
 import { examsService } from "@/lib/api/main";
 import Link from "next/link";
 import ResultViewer from "@/components/exam/ResultViewer";
+import { redirect } from "next/navigation";
 
 export default async function ExamResultsPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
   const resolvedParams = await params;
@@ -11,6 +12,11 @@ export default async function ExamResultsPage({ params }: { params: Promise<{ id
 
   if (!exam) {
     return <div style={{ padding: "20px" }}>Prova não encontrada.</div>;
+  }
+
+  const isComplete = await examsService.isExamComplete(examId);
+  if (!isComplete) {
+    redirect(`/dashboard/exams/${examId}`);
   }
 
   return (

@@ -63,7 +63,7 @@ model Alternatives {
 
 model Exams {
   id        String             @id @default(uuid())
-  user      Users              @relation(fields: [userId], references: [id])
+  user      Users              @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   areas     ExamAreas[]
   date      DateTime
@@ -92,9 +92,9 @@ model QuestionsOnExams {
 
 model History {
   id         String   @id @default(uuid())
-  user       Users    @relation(fields: [userId], references: [id])
+  user       Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
-  exam       Exams    @relation(fields: [examId], references: [id])
+  exam       Exams    @relation(fields: [examId], references: [id], onDelete: Cascade)
   examId     String
   finishedAt DateTime @default(now())
   score      Int?
