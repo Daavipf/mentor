@@ -8,8 +8,13 @@ export default class QuestionsRepository implements IQuestionsRepository {
     this.prisma = prismaClient;
   }
 
-  async getRandomQuestions(amount: number, area: string, language: string | null): Promise<Prisma.QuestionsModel[]> {
-    const shuffledIds = await this.getAllIds(amount, area, language);
+  async getRandomQuestions(
+    amount: number,
+    area: string,
+    year: number | null,
+    language: string | null,
+  ): Promise<Prisma.QuestionsModel[]> {
+    const shuffledIds = await this.getAllIds(amount, area, language, year);
 
     return this.prisma.questions.findMany({
       where: {
@@ -18,11 +23,25 @@ export default class QuestionsRepository implements IQuestionsRepository {
     });
   }
 
-  private async getAllIds(amount: number, area: string, language: string | null): Promise<string[]> {
-    const allIds = await this.prisma.questions.findMany({
-      where: { area: area, language: language },
-      select: { id: true },
-    });
+  private async getAllIds(
+    amount: number,
+    area: string,
+    language: string | null,
+    year: number | null,
+  ): Promise<string[]> {
+    let allIds;
+
+    if (year) {
+      allIds = await this.prisma.questions.findMany({
+        where: { area: area, language: language, year: year },
+        select: { id: true },
+      });
+    } else {
+      allIds = await this.prisma.questions.findMany({
+        where: { area: area, language: language },
+        select: { id: true },
+      });
+    }
 
     return allIds
       .map((item) => item.id)

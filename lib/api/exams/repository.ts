@@ -2,6 +2,8 @@ import { Prisma, PrismaClient } from "@/lib/prisma/prisma/client";
 import { IQuestionsRepository } from "@/lib/api/questions/interface";
 import { IExamsRepository } from "./interface";
 import { AnswerPayload } from "@/lib/api/types/AnswerPayload";
+import { CreateExamPayload } from "../types/CreateExamPayload";
+import { GetUserExamsRepositoryResponse } from "@/lib/api/types/GetUserExamsRepositoryResponse";
 
 export default class ExamsRepository implements IExamsRepository {
   prisma: PrismaClient;
@@ -13,16 +15,17 @@ export default class ExamsRepository implements IExamsRepository {
   }
 
   async createExam(
-    examPayload: Record<string, number>,
+    examPayload: CreateExamPayload,
     userId: string,
   ): Promise<[Prisma.ExamsModel, Prisma.QuestionsModel[], Prisma.AlternativesModel[]]> {
-    const selectedAreasCreateInput = Object.entries(examPayload).map(([area, _]) => ({
+    const selectedAreasCreateInput = Object.entries(examPayload.areas).map(([area, _]) => ({
       area: area,
     }));
 
     try {
       const exam = await this.prisma.exams.create({
         data: {
+          title: examPayload.title,
           userId: userId,
           date: new Date(),
           areas: {
@@ -33,9 +36,9 @@ export default class ExamsRepository implements IExamsRepository {
         },
       });
 
-      const completePayload = this.mapQuestionAreaName(examPayload);
+      const completePayload = this.mapQuestionAreaName(examPayload.areas);
       const questionsPromises = completePayload.map(({ area, language, amount }) =>
-        this.questionsRepository.getRandomQuestions(amount, area, language),
+        this.questionsRepository.getRandomQuestions(amount, area, examPayload.year, language),
       );
 
       const nestedQuestions = await Promise.all(questionsPromises);
@@ -87,9 +90,20 @@ export default class ExamsRepository implements IExamsRepository {
     }
   }
 
-  async getUserExams(userId: string): Promise<Prisma.ExamsModel[]> {
+  async getUserExams(userId: string, page: number, limit: number): Promise<GetUserExamsRepositoryResponse[]> {
     try {
-      const exams = await this.prisma.exams.findMany({ where: { userId } });
+      const skip = (page - 1) * limit;
+      const exams = await this.prisma.exams.findMany({
+        where: { userId },
+        take: limit,
+        skip: skip,
+        orderBy: { createdAt: "desc" },
+        include: {
+          areas: { select: { area: true } },
+          questions: { select: { gotRight: true } },
+          histories: { select: { finishedAt: true }, orderBy: { createdAt: "desc" }, take: 1 },
+        },
+      });
 
       return exams;
     } catch (error: any) {
@@ -139,19 +153,19 @@ export default class ExamsRepository implements IExamsRepository {
     }
   }
 
-  async markQuestion(examId: string, questionId: string, alternativeId: string): Promise<Prisma.QuestionsModel | null> {
-    try {
-      await this.prisma.questionsOnExams.update({
-        where: { questionId_examId: { questionId: questionId, examId: examId } },
-        data: { selectedAlternativeId: alternativeId },
-      });
+  // async markQuestion(examId: string, questionId: string, alternativeId: string): Promise<Prisma.QuestionsModel | null> {
+  //   try {
+  //     await this.prisma.questionsOnExams.update({
+  //       where: { questionId_examId: { questionId: questionId, examId: examId } },
+  //       data: { selectedAlternativeId: alternativeId },
+  //     });
 
-      return await this.prisma.questions.findFirst({ where: { id: questionId } });
-    } catch (error: any) {
-      console.error(error);
-      throw new Error(error.message);
-    }
-  }
+  //     return await this.prisma.questions.findFirst({ where: { id: questionId } });
+  //   } catch (error: any) {
+  //     console.error(error);
+  //     throw new Error(error.message);
+  //   }
+  // }
 
   async submitExam(examId: string, userId: string, answers: AnswerPayload[]): Promise<number> {
     const selectedAlternativesIds = answers.map((answer) => answer.selectedAlternativeId);

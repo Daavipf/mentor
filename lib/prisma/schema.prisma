@@ -19,6 +19,8 @@ model Users {
   name      String
   exams     Exams[]
   histories History[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
 }
 
 model Questions {
@@ -35,6 +37,8 @@ model Questions {
   title                    String?
   alternatives             Alternatives[]
   exams                    QuestionsOnExams[]
+  createdAt                DateTime           @default(now())
+  updatedAt                DateTime           @default(now())
 }
 
 model QuestionTopics {
@@ -67,8 +71,11 @@ model Exams {
   userId    String
   areas     ExamAreas[]
   date      DateTime
+  title     String
   questions QuestionsOnExams[]
   histories History[]
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @default(now())
 }
 
 model ExamAreas {
@@ -86,16 +93,20 @@ model QuestionsOnExams {
   gotRight              Boolean?
   userAlternative       Alternatives? @relation(fields: [selectedAlternativeId], references: [id])
   selectedAlternativeId String?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @default(now())
 
   @@id([questionId, examId])
 }
 
 model History {
-  id         String   @id @default(uuid())
-  user       Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String    @id @default(uuid())
+  user       Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
-  exam       Exams    @relation(fields: [examId], references: [id], onDelete: Cascade)
+  exam       Exams     @relation(fields: [examId], references: [id], onDelete: Cascade)
   examId     String
-  finishedAt DateTime @default(now())
   score      Int?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now())
+  finishedAt DateTime?
 }

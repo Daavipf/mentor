@@ -2,9 +2,11 @@ import { Prisma } from "@/lib/prisma/prisma/client";
 import { AnswerPayload } from "@/lib/api/types/AnswerPayload";
 import { ExamDTO } from "@/lib/api/types/ExamDTO";
 import { QuestionDTO } from "@/lib/api/types/QuestionDTO";
+import { ExamCardDTO } from "@/lib/api/types/ExamCardDTO";
 import { IExamsRepository, IExamsService } from "./interface";
 import { IQuestionsRepository } from "@/lib/api/questions/interface";
 import { IHistoryRepository } from "@/lib/api/history/interface";
+import { CreateExamPayload } from "@/lib/api/types/CreateExamPayload";
 
 export default class ExamsService implements IExamsService {
   examsRepository: IExamsRepository;
@@ -21,7 +23,7 @@ export default class ExamsService implements IExamsService {
     this.historyRepository = historyRepository;
   }
 
-  async createExam(examPayload: Record<string, number>, userId: string): Promise<ExamDTO> {
+  async createExam(examPayload: CreateExamPayload, userId: string): Promise<ExamDTO> {
     const [exam, questions, alternatives] = await this.examsRepository.createExam(examPayload, userId);
     const examAreas = Object.entries(examPayload).map(([area, _]) => area);
 
@@ -36,10 +38,37 @@ export default class ExamsService implements IExamsService {
     };
   }
 
-  async getUserExams(userId: string): Promise<Prisma.ExamsModel[]> {
-    const exams = await this.examsRepository.getUserExams(userId);
+  // async getUserExams(userId: string): Promise<Prisma.ExamsModel[]> {
+  //   const exams = await this.examsRepository.getUserExams(userId);
 
-    return exams;
+  //   return exams;
+  // }
+
+  async getUserExams(userId: string, page: number, limit: number): Promise<ExamCardDTO[]> {
+    // Agora 'exams' já vem "recheado" com áreas, questões e histórico
+    const exams = await this.examsRepository.getUserExams(userId, page, limit);
+
+    return exams.map((e) => {
+      // Filtramos se há alguma resposta registrada
+      const hasAnswers = e.questions.some((q) => q.gotRight !== null);
+
+      // Conta os acertos ou retorna null se não houver respostas
+      const rightQuestions = hasAnswers ? e.questions.filter((q) => q.gotRight === true).length : null;
+
+      // Pega o finishedAt do array de histories (se existir)
+      const finishedAt =
+        e.histories.length > 0 && e.histories[0].finishedAt ? e.histories[0].finishedAt.toISOString() : null;
+
+      return {
+        id: e.id,
+        title: e.title,
+        date: e.createdAt.toISOString(),
+        finishedAt: finishedAt,
+        areas: e.areas.map((a) => a.area), // Mapeia o array de objetos para array de strings
+        questions: e.questions.length, // Apenas o tamanho do array de QuestionsOnExams
+        rightQuestions: rightQuestions,
+      };
+    });
   }
 
   async getExam(id: string): Promise<ExamDTO> {
@@ -90,7 +119,7 @@ export default class ExamsService implements IExamsService {
       const examHistory = await this.historyRepository.getExamHistory(examId);
       if (!examHistory) return false;
 
-      return examHistory.finishedAt < new Date();
+      return examHistory.finishedAt != null && examHistory.finishedAt < new Date();
     } catch (error: any) {
       console.error(error);
       throw new Error(error.message);

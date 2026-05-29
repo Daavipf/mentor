@@ -36,7 +36,7 @@ export default function RegisterForm() {
         </InputGroupAddon>
       </InputGroup>
       <InputGroup>
-        <InputGroupInput name="password" type="confirmPassword" placeholder="Confirme a senha" required />
+        <InputGroupInput name="confirmPassword" type="password" placeholder="Confirme a senha" required />
         <InputGroupAddon align="inline-end">
           <Eye />
         </InputGroupAddon>
