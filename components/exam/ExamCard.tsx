@@ -34,9 +34,12 @@ export default function ExamCard({ exam }: Props) {
     }
   }
 
-  function formatDate(dateString: string): string {
-    if (!dateString) return "N/A";
-    const [day, month] = dateString.split("-");
+  function formatDate(date: Date): string {
+    if (!date) return "N/A";
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+
     return `${day}/${month}`;
   }
 
@@ -56,21 +59,21 @@ export default function ExamCard({ exam }: Props) {
           <CardDescription>{getBadge()}</CardDescription>
           <CardAction>
             <div className="flex gap-1 items-center">
-              <Calendar />
-              {formatDate(exam.date)}
+              <Calendar size={20} />
+              <p className="text-sm">{formatDate(new Date(exam.date))}</p>
             </div>
           </CardAction>
         </CardHeader>
         <CardContent>
           <div className="flex justify-between items-end">
-            <div className="flex gap-1">
+            <div className="flex flex-wrap gap-1 max-w-4/5">
               {exam.areas.map((area) => (
-                <Badge className="bg-zinc-300 dark:bg-zinc-700">
+                <Badge key={area} className="bg-zinc-300 dark:bg-zinc-700">
                   <p className="text-black dark:text-zinc-300">{area}</p>
                 </Badge>
               ))}
             </div>
-            <p className="text-xl">{exam.rightQuestions ? `${exam.rightQuestions}/${exam.questions}` : "N/A"}</p>
+            <p className="text-lg">{exam.rightQuestions ? `${exam.rightQuestions}/${exam.questions}` : "N/A"}</p>
           </div>
         </CardContent>
       </Card>

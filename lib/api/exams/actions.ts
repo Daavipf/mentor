@@ -7,8 +7,9 @@ import { verifyJwt } from "../auth/util";
 import { redirect } from "next/navigation";
 import { AnswerPayload } from "../types/AnswerPayload";
 import { revalidatePath } from "next/cache";
+import { CreateExamPayload } from "@/lib/api/types/CreateExamPayload";
 
-export async function generateExamAction(requests: Record<string, number>) {
+export async function generateExamAction(requests: CreateExamPayload) {
   let examId: string;
 
   try {

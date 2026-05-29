@@ -2,12 +2,20 @@
 
 import { useState } from "react";
 import { generateExamAction } from "@/lib/api/exams/actions";
+import { CreateExamPayload } from "@/lib/api/types/CreateExamPayload";
+
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import AreaSelect from "./areaSelect";
+import SelectedAreaItem from "./selectedAreaItem";
 
 const MIN_QUESTIONS = 5;
 const MAX_QUESTIONS = 45;
+const MIN_YEAR = 2009;
+const MAX_YEAR = 2023;
 
-// 1. Defina suas áreas de conhecimento pré-definidas aqui
 const PREDEFINED_AREAS = [
   "Matemática",
   "Linguagens",
@@ -18,13 +26,15 @@ const PREDEFINED_AREAS = [
 ];
 
 export default function ExamsForm() {
-  const [areaInput, setAreaInput] = useState("");
+  const [title, setTitle] = useState<string>("");
+  const [year, setYear] = useState<number | "">("");
+
+  const [areas, setAreas] = useState<Record<string, number>>({});
+
+  const [areaInput, setAreaInput] = useState<string>("");
   const [amountInput, setAmountInput] = useState<number>(MIN_QUESTIONS);
 
-  const [requests, setRequests] = useState<Record<string, number>>({});
-
-  // 2. Filtra as áreas disponíveis: só mantém as que NÃO estão no objeto requests
-  const availableAreas = PREDEFINED_AREAS.filter((area) => !Object.keys(requests).includes(area));
+  const availableAreas = PREDEFINED_AREAS.filter((area) => !Object.keys(areas).includes(area));
 
   const handleAddRequest = () => {
     if (!areaInput || amountInput <= 0) {
@@ -32,94 +42,101 @@ export default function ExamsForm() {
       return;
     }
 
-    setRequests((prev) => ({
+    setAreas((prev) => ({
       ...prev,
-      [areaInput]: amountInput, // Como a área some do select, não precisamos mais somar, apenas atribuir
+      [areaInput]: amountInput,
     }));
 
-    // Reseta os inputs para o estado inicial
     setAreaInput("");
     setAmountInput(MIN_QUESTIONS);
   };
 
   const handleRemoveRequest = (areaToRemove: string) => {
-    setRequests((prev) => {
-      const newRequests = { ...prev };
-      delete newRequests[areaToRemove];
-      return newRequests;
+    setAreas((prev) => {
+      const newAreas = { ...prev };
+      delete newAreas[areaToRemove];
+      return newAreas;
     });
   };
 
   const handleSubmit = async (formData: FormData) => {
-    if (Object.keys(requests).length === 0) {
+    if (!title.trim()) {
+      toast.warning("O título da prova é obrigatório.");
+      return;
+    }
+
+    if (Object.keys(areas).length === 0) {
       toast.warning("Adicione pelo menos uma área antes de gerar a prova.");
       return;
     }
 
-    // Chama a Server Action
-    await generateExamAction(requests);
+    const payload: CreateExamPayload = {
+      title: title.trim(),
+      year: year === "" ? null : Number(year),
+      areas: areas,
+    };
+
+    await generateExamAction(payload);
   };
 
   return (
     <form action={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-        {/* 3. Input substituído pelo Select */}
-        <select
-          value={areaInput}
-          onChange={(e) => setAreaInput(e.target.value)}
-          disabled={availableAreas.length === 0} // Desabilita se acabarem as opções
-        >
-          <option value="" disabled>
-            {availableAreas.length > 0 ? "Selecione uma área..." : "Nenhuma área disponível"}
-          </option>
+      {/* Campos base do Exam (Title e Year) */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        <Input
+          type="text"
+          placeholder="Título da Prova"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+        <Input
+          type="number"
+          placeholder="Ano (Opcional)"
+          value={year}
+          min={MIN_YEAR}
+          max={MAX_YEAR}
+          onChange={(e) => setYear(e.target.value === "" ? "" : Number(e.target.value))}
+        />
+      </div>
 
-          {availableAreas.map((area) => (
-            <option key={area} value={area}>
-              {area}
-            </option>
-          ))}
-        </select>
+      <hr className="w-full border mt-2.5 mb-2.5" />
 
-        <input
+      {/* Controles de Áreas e Quantidades */}
+      <div className="flex gap-2.5 items-center">
+        <AreaSelect areaInput={areaInput} setAreaInput={setAreaInput} availableAreas={availableAreas} />
+
+        <Input
           type="number"
           min={MIN_QUESTIONS}
           max={MAX_QUESTIONS}
           value={amountInput}
           onChange={(e) => setAmountInput(Number(e.target.value))}
-          disabled={availableAreas.length === 0} // Opcional: trava o número se não houver área
+          disabled={availableAreas.length === 0}
         />
-        <button type="button" onClick={handleAddRequest} disabled={availableAreas.length === 0 || !areaInput}>
-          Adicionar à prova
-        </button>
+        <Button
+          size="icon-lg"
+          type="button"
+          onClick={handleAddRequest}
+          disabled={availableAreas.length === 0 || !areaInput}
+        >
+          <Plus />
+        </Button>
       </div>
 
-      {/* Lista de Tarefas / Áreas Solicitadas */}
+      {/* Lista de Áreas Solicitadas */}
       <ul style={{ listStyle: "none", padding: 0 }}>
-        {Object.entries(requests).map(([area, amount]) => (
-          <li
-            key={area}
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "8px",
-              padding: "8px",
-              border: "1px solid #ccc",
-            }}
-          >
-            <span>
-              <strong>{area}</strong>: {amount} questões
-            </span>
-            <button type="button" onClick={() => handleRemoveRequest(area)}>
-              Remover
-            </button>
+        {Object.entries(areas).map(([area, amount]) => (
+          <li key={area}>
+            <SelectedAreaItem area={area} amount={amount} handleRemoveRequest={handleRemoveRequest} />
           </li>
         ))}
       </ul>
 
       {/* Submit final */}
-      <button type="submit" disabled={Object.keys(requests).length === 0}>
+      <Button size="lg" type="submit" disabled={Object.keys(areas).length === 0 || !title.trim()}>
         Gerar Prova
-      </button>
+      </Button>
     </form>
   );
 }
