@@ -31,6 +31,7 @@ export default class ExamsService implements IExamsService {
 
     return {
       id: exam.id,
+      title: exam.title,
       areas: examAreas,
       date: exam.date,
       questions: questionsDTO,
@@ -83,6 +84,7 @@ export default class ExamsService implements IExamsService {
 
     return {
       id: exam.id,
+      title: exam.title,
       areas: examAreas.map((a) => a.area),
       date: exam.date,
       questions: questionsDTO,
@@ -105,6 +107,7 @@ export default class ExamsService implements IExamsService {
     return [
       {
         id: exam.id,
+        title: exam.title,
         areas: examAreas.map((a) => a.area),
         date: exam.date,
         questions: questionsDTO,

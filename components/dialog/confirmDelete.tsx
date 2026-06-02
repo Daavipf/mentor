@@ -27,7 +27,7 @@ export default function ConfirmDeleteDialog({ examId }: { examId: string }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline">Deletar</Button>
+        <Button variant="outline">Deletar Prova</Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

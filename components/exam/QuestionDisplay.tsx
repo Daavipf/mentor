@@ -2,6 +2,7 @@
 
 import { ExamDTO } from "@/lib/api/types/ExamDTO";
 import AlternativeItem from "./AlternativeItem";
+import { Badge } from "../ui/badge";
 
 type Question = NonNullable<ExamDTO["questions"]>[number];
 
@@ -17,15 +18,15 @@ export default function QuestionDisplay({
   onSelectAlternative,
 }: QuestionDisplayProps) {
   return (
-    <div style={{ border: "1px solid #eee", padding: "20px", borderRadius: "8px" }}>
-      <div style={{ marginBottom: "15px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h3 style={{ margin: 0 }}>Questão {question.index}</h3>
-        <span style={{ fontSize: "12px", background: "#e0e0e0", padding: "4px 8px", borderRadius: "12px" }}>
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">Questão {question.index}</h3>
+        <Badge>
           {question.area} {question.language && `(${question.language})`} • {question.year}
-        </span>
+        </Badge>
       </div>
 
-      {question.title && <h4 style={{ margin: "0 0 10px 0", color: "#333" }}>{question.title}</h4>}
+      {/*question.title && <h4 style={{ margin: "0 0 10px 0", color: "#333" }}>{question.title}</h4>*/}
 
       {question.context && (
         <p style={{ whiteSpace: "pre-wrap", textAlign: "justify", marginBottom: "15px" }}>{question.context}</p>
@@ -38,7 +39,6 @@ export default function QuestionDisplay({
       {question.alternatives && (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px" }}>
           {question.alternatives.map((alt, index) => {
-            // Converte o index (0, 1, 2) para letras (A, B, C)
             const letter = String.fromCharCode(65 + index);
 
             return (

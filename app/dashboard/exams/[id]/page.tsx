@@ -3,14 +3,14 @@ import { verifyJwt } from "@/lib/api/auth/util";
 import { examsService } from "@/lib/api/main";
 import Link from "next/link";
 import { ExamDTO } from "@/lib/api/types/ExamDTO";
-import ExamViewer from "@/components/exam/ExamViewer"; // Importando o Client Component
+import ExamViewer from "@/components/exam/ExamViewer";
 import { redirect } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 export default async function ExamDetailPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
   const resolvedParams = await params;
   const examId = resolvedParams.id;
 
-  // 1. Validação de usuário
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
   const payload = token ? verifyJwt(token) : null;
@@ -24,33 +24,31 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
     redirect(`/dashboard/exams/result/${examId}`);
   }
 
-  // 2. Busca os detalhes da prova
   const exam: ExamDTO = await examsService.getExam(examId);
 
   if (!exam) {
-    return <div style={{ padding: "20px" }}>Prova não encontrada.</div>;
+    return (
+      <section className="h-full flex flex-col p-4 gap-6 bg-zinc-100 dark:bg-zinc-950">
+        <div className="w-full flex justify-between">
+          <Link href="/dashboard/exams">
+            <ArrowLeft size={28} />
+          </Link>
+        </div>
+        <div style={{ padding: "20px" }}>Prova não encontrada.</div>;
+      </section>
+    );
   }
 
   return (
-    <div style={{ padding: "20px", fontFamily: "sans-serif", maxWidth: "800px", margin: "0 auto" }}>
-      <Link href="/dashboard/exams" style={{ color: "blue", textDecoration: "none" }}>
-        &larr; Voltar para minhas provas
-      </Link>
-
-      <div style={{ marginTop: "20px", padding: "15px", backgroundColor: "#f5f5f5", borderRadius: "8px" }}>
-        <h1 style={{ margin: "0 0 10px 0" }}>Prova: {exam.id}</h1>
-        <p style={{ margin: "5px 0" }}>
-          <strong>Data de Criação:</strong> {new Date(exam.date).toLocaleDateString("pt-BR")}
-        </p>
-        <p style={{ margin: "5px 0" }}>
-          <strong>Áreas:</strong> {exam.areas.join(", ")}
-        </p>
+    <section className="min-h-full flex flex-col p-4 gap-6 bg-zinc-100 dark:bg-zinc-950">
+      <div className="w-full flex justify-between">
+        <Link href="/dashboard/exams">
+          <ArrowLeft size={28} />
+        </Link>
+        <h1 className="text-2xl">{exam.title}</h1>
       </div>
 
-      <hr style={{ margin: "30px 0" }} />
-
-      {/* Renderização Interativa das Questões */}
       <ExamViewer questions={exam.questions} examId={exam.id} />
-    </div>
+    </section>
   );
 }

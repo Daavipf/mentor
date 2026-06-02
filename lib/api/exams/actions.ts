@@ -40,20 +40,20 @@ export async function submitExamAction(examId: string, answers: AnswerPayload[])
 }
 
 export async function deleteExamAction(examId: string) {
+  let success: boolean = false;
   try {
     const userId = await authenticateSession();
-
-    const success = await examsService.deleteExam(examId, userId);
-
-    if (success) {
-      revalidatePath("/dashboard/exams");
-      return { success: true };
-    } else {
-      return { success: false, error: "Falha ao deletar a prova." };
-    }
+    success = await examsService.deleteExam(examId, userId);
   } catch (error: any) {
     console.error("Erro ao deletar prova:", error);
     return { success: false, error: error.message || "Erro interno ao deletar a prova." };
+  }
+
+  if (success) {
+    revalidatePath("/dashboard/exams");
+    redirect("/dashboard/exams");
+  } else {
+    return { success: false, error: "Falha ao deletar a prova." };
   }
 }
 

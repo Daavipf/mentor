@@ -73,7 +73,9 @@ export default function ExamCard({ exam }: Props) {
                 </Badge>
               ))}
             </div>
-            <p className="text-lg">{exam.rightQuestions ? `${exam.rightQuestions}/${exam.questions}` : "N/A"}</p>
+            <p className="text-lg">
+              {exam.rightQuestions !== undefined ? `${exam.rightQuestions || 0}/${exam.questions}` : "N/A"}
+            </p>
           </div>
         </CardContent>
       </Card>

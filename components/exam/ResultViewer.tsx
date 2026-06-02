@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { ExamDTO } from "@/lib/api/types/ExamDTO";
-import ExamNavigation from "../../components/exam/ExamNavigation";
+import QuestionSelect from "./QuestionSelect";
 import ResultQuestionDisplay from "./ResultQuestionDislay";
 import { Prisma } from "@/lib/prisma/prisma/client";
+import ExamPaginationButtons from "./ExamPaginationButtons";
 
 type Question = NonNullable<ExamDTO["questions"]>[number];
 
@@ -23,14 +24,15 @@ export default function ResultViewer({ questions, userAnswers }: ResultViewerPro
   const currentQuestion = questions[currentIndex];
   const totalQuestions = questions.length;
 
-  // Encontra a resposta específica do usuário para a questão atual
   const currentUserAnswer = userAnswers.find((ua) => ua.questionId === currentQuestion.id);
 
   return (
     <div>
-      <ExamNavigation currentIndex={currentIndex} totalQuestions={totalQuestions} onNavigate={setCurrentIndex} />
+      <QuestionSelect currentIndex={currentIndex} totalQuestions={totalQuestions} onNavigate={setCurrentIndex} />
 
       <ResultQuestionDisplay question={currentQuestion} userAnswer={currentUserAnswer} />
+
+      <ExamPaginationButtons currentIndex={currentIndex} totalQuestions={totalQuestions} onNavigate={setCurrentIndex} />
     </div>
   );
 }

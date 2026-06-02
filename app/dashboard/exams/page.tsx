@@ -10,7 +10,6 @@ import ExamCard from "@/components/exam/ExamCard";
 import { ExamCardDTO } from "@/lib/api/types/ExamCardDTO";
 
 export default async function ExamsListPage() {
-  // 1. Pega e valida a sessão
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
   const payload = token ? verifyJwt(token) : null;
@@ -19,7 +18,6 @@ export default async function ExamsListPage() {
     return <div style={{ padding: "20px" }}>Houve um erro ao ver suas provas.</div>;
   }
 
-  // 2. Busca a lista básica de provas do usuário
   const exams: ExamCardDTO[] = await examsService.getUserExams(payload.userId, 1, 10);
 
   return (
@@ -31,12 +29,6 @@ export default async function ExamsListPage() {
         <h1 className="text-2xl">Minhas Provas</h1>
       </div>
       <div className="flex flex-col gap-3">
-        <div className="flex justify-between items-end">
-          <h2 className="text-lg">Provas</h2>
-          <Link href="/dashboard/exams" className="text-sm underline font-semibold">
-            Ver tudo
-          </Link>
-        </div>
         <div className="flex flex-col gap-2">
           {exams.map((exam) => (
             <ExamCard key={exam.id} exam={exam} />
