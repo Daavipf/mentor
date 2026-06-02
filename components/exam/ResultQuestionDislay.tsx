@@ -3,6 +3,7 @@
 import { ExamDTO } from "@/lib/api/types/ExamDTO";
 import ResultAlternativeItem from "./ResultAlternativeItem";
 import { Prisma } from "@/lib/prisma/prisma/client";
+import { Badge } from "@/components/ui/badge";
 
 type Question = NonNullable<ExamDTO["questions"]>[number];
 
@@ -13,44 +14,36 @@ interface ResultQuestionDisplayProps {
 
 export default function ResultQuestionDisplay({ question, userAnswer }: ResultQuestionDisplayProps) {
   return (
-    <div style={{ border: "1px solid #eee", padding: "20px", borderRadius: "8px", backgroundColor: "#fff" }}>
-      {/* Cabeçalho da questão omitido para brevidade (mantenha o mesmo que você já tem) */}
-      <div style={{ marginBottom: "15px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h3 style={{ margin: 0 }}>Questão {question.index}</h3>
-        <span style={{ fontSize: "12px", background: "#e0e0e0", padding: "4px 8px", borderRadius: "12px" }}>
+    <div className="flex flex-col w-full">
+      <div className="mb-6 flex justify-between items-center">
+        <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Questão {question.index}</h3>
+
+        <Badge variant="secondary">
           {question.area} {question.language && `(${question.language})`} • {question.year}
-        </span>
+        </Badge>
       </div>
 
-      {question.title && <h4 style={{ margin: "0 0 10px 0", color: "#333" }}>{question.title}</h4>}
       {question.context && (
-        <p style={{ whiteSpace: "pre-wrap", textAlign: "justify", marginBottom: "15px" }}>{question.context}</p>
-      )}
-      {question.alternativesIntroduction && (
-        <p style={{ fontWeight: "bold", marginBottom: "15px" }}>{question.alternativesIntroduction}</p>
+        <p className="whitespace-pre-wrap text-justify mb-6 leading-relaxed text-zinc-800 dark:text-zinc-200">
+          {question.context}
+        </p>
       )}
 
-      {/* Exibição se o usuário não tiver respondido nada nessa questão */}
+      {question.alternativesIntroduction && (
+        <p className="font-semibold mb-6 text-zinc-900 dark:text-zinc-100">{question.alternativesIntroduction}</p>
+      )}
+
       {userAnswer?.selectedAlternativeId === null && (
-        <div
-          style={{
-            padding: "10px",
-            backgroundColor: "#fff3cd",
-            color: "#856404",
-            borderRadius: "4px",
-            marginBottom: "15px",
-          }}
-        >
-          ⚠️ Você deixou esta questão em branco.
+        <div className="p-4 mb-6 flex items-center gap-2 rounded-md bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-950/30 dark:text-amber-500 dark:border-amber-900">
+          <span className="text-xl">⚠️</span>
+          <span className="font-medium">Você deixou esta questão em branco.</span>
         </div>
       )}
 
       {question.alternatives && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px" }}>
+        <div className="flex flex-col gap-3 mt-4">
           {question.alternatives.map((alt, index) => {
             const letter = String.fromCharCode(65 + index);
-
-            // Verifica se esta foi a alternativa que o usuário selecionou
             const isSelected = userAnswer?.selectedAlternativeId === alt.id;
 
             return <ResultAlternativeItem key={alt.id} alternative={alt} letter={letter} isSelected={isSelected} />;

@@ -1,6 +1,7 @@
 "use client";
 
 import { ExamDTO } from "@/lib/api/types/ExamDTO";
+import { cn } from "@/lib/utils";
 
 type Alternative = NonNullable<NonNullable<ExamDTO["questions"]>[number]["alternatives"]>[number] & {
   isCorrect?: boolean;
@@ -15,53 +16,45 @@ interface ResultAlternativeItemProps {
 export default function ResultAlternativeItem({ alternative, letter, isSelected }: ResultAlternativeItemProps) {
   const isCorrect = alternative.isCorrect;
 
-  // Cores Padrão (Neutro)
-  let bgColor = "#fafafa";
-  let borderColor = "#ddd";
-  let textColor = "#333";
-
-  // Se for a alternativa correta (gabarito), sempre destaca em verde
-  if (isCorrect) {
-    bgColor = "#e6ffed";
-    borderColor = "#2ea043";
-    textColor = "#055016";
-  }
-  // Se o usuário marcou E está errada, destaca em vermelho
-  else if (isSelected && !isCorrect) {
-    bgColor = "#ffebe9";
-    borderColor = "#cb2431";
-    textColor = "#9e1c23";
-  }
-
   return (
     <div
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: "12px",
-        padding: "12px",
-        backgroundColor: bgColor,
-        border: `1px solid ${borderColor}`,
-        borderRadius: "6px",
-        color: textColor,
-        opacity: !isCorrect && !isSelected ? 0.7 : 1, // Suaviza alternativas irrelevantes
-      }}
+      className={cn(
+        "flex items-start gap-3 p-3 border rounded-md transition-colors",
+        // Estado: Correta
+        isCorrect &&
+          "bg-emerald-100 border-emerald-500 text-emerald-900 dark:bg-emerald-950/30 dark:border-emerald-600 dark:text-emerald-200",
+        // Estado: Incorreta, mas selecionada pelo usuário
+        isSelected &&
+          !isCorrect &&
+          "bg-red-100 border-red-500 text-red-900 dark:bg-red-950/30 dark:border-red-600 dark:text-red-200",
+        // Estado: Incorreta e não selecionada (Padrão)
+        !isCorrect &&
+          !isSelected &&
+          "bg-zinc-50 border-zinc-200 text-zinc-800 opacity-70 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-300",
+      )}
     >
-      <input type="radio" checked={isSelected} readOnly disabled style={{ marginTop: "4px" }} />
+      <input type="radio" checked={isSelected} readOnly disabled className="mt-1 cursor-not-allowed" />
 
-      <div style={{ display: "flex", gap: "8px", flex: 1 }}>
-        <strong style={{ color: borderColor }}>{letter})</strong>
+      <div className="flex flex-1 gap-2">
+        <strong
+          className={cn(
+            isCorrect && "text-emerald-600 dark:text-emerald-500",
+            isSelected && !isCorrect && "text-red-600 dark:text-red-500",
+            !isCorrect && !isSelected && "text-zinc-500 dark:text-zinc-400",
+          )}
+        >
+          {letter})
+        </strong>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        <div className="flex flex-col gap-2">
           {alternative.text && <span>{alternative.text}</span>}
 
           {alternative.file && (
             <div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={alternative.file}
                 alt={`Alternativa ${letter}`}
-                style={{ maxWidth: "200px", maxHeight: "200px", objectFit: "contain", borderRadius: "4px" }}
+                className="max-w-[200px] max-h-[200px] object-contain rounded-md"
               />
             </div>
           )}
@@ -69,12 +62,13 @@ export default function ResultAlternativeItem({ alternative, letter, isSelected 
       </div>
 
       {isCorrect && isSelected && (
-        <span style={{ fontSize: "12px", color: "#2ea043", fontWeight: "bold", marginLeft: "auto" }}>
+        <span className="ml-auto whitespace-nowrap text-xs font-bold text-emerald-600 dark:text-emerald-500">
           ✓ Você acertou
         </span>
       )}
+
       {isSelected && !isCorrect && (
-        <span style={{ fontSize: "12px", color: "#cb2431", fontWeight: "bold", marginLeft: "auto" }}>
+        <span className="ml-auto whitespace-nowrap text-xs font-bold text-red-600 dark:text-red-500">
           ✗ Você marcou
         </span>
       )}
