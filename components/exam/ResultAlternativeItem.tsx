@@ -54,7 +54,7 @@ export default function ResultAlternativeItem({ alternative, letter, isSelected 
               <img
                 src={alternative.file}
                 alt={`Alternativa ${letter}`}
-                className="max-w-[200px] max-h-[200px] object-contain rounded-md"
+                className="max-w-50 max-h-50 object-contain rounded-md"
               />
             </div>
           )}

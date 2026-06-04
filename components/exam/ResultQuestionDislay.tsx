@@ -29,6 +29,8 @@ export default function ResultQuestionDisplay({ question, userAnswer }: ResultQu
         </p>
       )}
 
+      {question.files && question.files.map((i) => <img key={i} src={i} />)}
+
       {question.alternativesIntroduction && (
         <p className="font-semibold mb-6 text-zinc-900 dark:text-zinc-100">{question.alternativesIntroduction}</p>
       )}
