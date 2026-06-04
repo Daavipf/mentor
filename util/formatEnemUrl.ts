@@ -1,5 +1,7 @@
-function formatEnemUrl(urlString: string, path: string = "/assets"): string {
+function formatEnemUrl(urlString: string | null, path: string = "/assets"): string | null {
   try {
+    if (!urlString) return null;
+
     const url = new URL(urlString);
 
     const cleanPath = path.endsWith("/") ? path.slice(0, -1) : path;

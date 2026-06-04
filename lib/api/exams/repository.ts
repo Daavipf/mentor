@@ -123,7 +123,7 @@ export default class ExamsRepository implements IExamsRepository {
     }
   }
 
-  async getExamQuestions(examId: string): Promise<Prisma.QuestionsModel[]> {
+  async getExamQuestions(examId: string): Promise<[Prisma.QuestionsModel[], Prisma.QuestionImagesModel[]]> {
     try {
       const questionsOnExam = await this.prisma.questionsOnExams.findMany({
         where: { examId },
@@ -133,7 +133,11 @@ export default class ExamsRepository implements IExamsRepository {
         where: { id: { in: questionsOnExam.map((q) => q.questionId) } },
       });
 
-      return questions;
+      const questionsImages = await this.prisma.questionImages.findMany({
+        where: { questionId: { in: questionsOnExam.map((q) => q.questionId) } },
+      });
+
+      return [questions, questionsImages];
     } catch (error: any) {
       console.error(error);
       throw new Error(error.message);

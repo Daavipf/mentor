@@ -9,9 +9,10 @@ export type QuestionDTO = {
   year: number;
   context: string | null;
   alternativesIntroduction: string | null;
+  files: string[];
   alternatives: IAlternative[];
 };
 
-export interface QuestionResultDTO extends Omit<QuestionDTO, 'alternatives'>{
-  alternatives: AlternativeComplete[]
+export interface QuestionResultDTO extends Omit<QuestionDTO, "alternatives"> {
+  alternatives: AlternativeComplete[];
 }

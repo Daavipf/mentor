@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { prisma } from "@/lib/prisma/prisma";
 import { Prisma } from "./prisma/client";
+import { formatEnemUrl } from "@/util/formatEnemUrl";
 
 type APIResponse = {
   metadata: {
@@ -33,6 +34,7 @@ type Alternative = {
 };
 
 const enemApiBaseUrl = process.env.ENEM_API_URL;
+const imagePathTemplate = process.env.IMAGE_PATH_TEMPLATE;
 const YEAR_START = 2009;
 const YEAR_END = 2023;
 const LIMIT = 200;
@@ -82,12 +84,12 @@ function mapQuestionPayload(question: Question): Prisma.QuestionsCreateInput {
       create: question.alternatives.map((alternative) => ({
         text: alternative.text,
         isCorrect: alternative.isCorrect,
-        imagePath: alternative.file,
+        imagePath: formatEnemUrl(alternative.file, imagePathTemplate) || null,
       })),
     },
     images: {
       create: question.files.map((image) => ({
-        path: image,
+        path: formatEnemUrl(image, imagePathTemplate) || "",
       })),
     },
   };

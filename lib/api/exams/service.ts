@@ -39,24 +39,14 @@ export default class ExamsService implements IExamsService {
     };
   }
 
-  // async getUserExams(userId: string): Promise<Prisma.ExamsModel[]> {
-  //   const exams = await this.examsRepository.getUserExams(userId);
-
-  //   return exams;
-  // }
-
   async getUserExams(userId: string, page: number, limit: number): Promise<ExamCardDTO[]> {
-    // Agora 'exams' já vem "recheado" com áreas, questões e histórico
     const exams = await this.examsRepository.getUserExams(userId, page, limit);
 
     return exams.map((e) => {
-      // Filtramos se há alguma resposta registrada
       const hasAnswers = e.questions.some((q) => q.gotRight !== null);
 
-      // Conta os acertos ou retorna null se não houver respostas
       const rightQuestions = hasAnswers ? e.questions.filter((q) => q.gotRight === true).length : null;
 
-      // Pega o finishedAt do array de histories (se existir)
       const finishedAt =
         e.histories.length > 0 && e.histories[0].finishedAt ? e.histories[0].finishedAt.toISOString() : null;
 
@@ -65,8 +55,8 @@ export default class ExamsService implements IExamsService {
         title: e.title,
         date: e.createdAt.toISOString(),
         finishedAt: finishedAt,
-        areas: e.areas.map((a) => a.area), // Mapeia o array de objetos para array de strings
-        questions: e.questions.length, // Apenas o tamanho do array de QuestionsOnExams
+        areas: e.areas.map((a) => a.area),
+        questions: e.questions.length,
         rightQuestions: rightQuestions,
       };
     });
@@ -76,11 +66,11 @@ export default class ExamsService implements IExamsService {
     const exam = await this.examsRepository.getExam(id);
     if (!exam) throw new Error("Prova não encontada");
 
-    const questions = await this.examsRepository.getExamQuestions(exam.id);
+    const [questions, questionsImages] = await this.examsRepository.getExamQuestions(exam.id);
     const questionsIds = questions.map((q) => q.id);
     const alternatives = await this.questionsRepository.getMultipleQuestionsAlternatives(questionsIds);
     const examAreas = await this.examsRepository.getExamAreas(exam.id);
-    const questionsDTO: QuestionDTO[] = this.mapQuestionsToDTO(questions, alternatives);
+    const questionsDTO: QuestionDTO[] = this.mapQuestionsToDTO(questions, alternatives, questionsImages);
 
     return {
       id: exam.id,
@@ -96,11 +86,11 @@ export default class ExamsService implements IExamsService {
     const exam = await this.examsRepository.getExam(id);
     if (!exam) throw new Error("Prova não encontada");
 
-    const questions = await this.examsRepository.getExamQuestions(exam.id);
+    const [questions, questionsImages] = await this.examsRepository.getExamQuestions(exam.id);
     const questionsIds = questions.map((q) => q.id);
     const alternatives = await this.questionsRepository.getMultipleQuestionsAlternatives(questionsIds);
     const examAreas = await this.examsRepository.getExamAreas(exam.id);
-    const questionsDTO: QuestionDTO[] = this.mapQuestionsToDTO(questions, alternatives, true);
+    const questionsDTO: QuestionDTO[] = this.mapQuestionsToDTO(questions, alternatives, questionsImages, true);
 
     const userSelectedAlternatives = await this.examsRepository.getExamQuestionsResults(exam.id);
 
@@ -145,10 +135,12 @@ export default class ExamsService implements IExamsService {
   private mapQuestionsToDTO(
     questions: Prisma.QuestionsModel[],
     alternatives: Prisma.AlternativesModel[],
+    questionsImages?: Prisma.QuestionImagesModel[],
     includeResults: boolean = false,
   ): QuestionDTO[] {
     return questions.map((q) => {
       const qAlternatives = alternatives.filter((a) => a.questionId === q.id);
+      const files = questionsImages ? questionsImages.filter((i) => i.questionId === q.id).map((i) => i.path) : [];
 
       return {
         id: q.id,
@@ -159,6 +151,7 @@ export default class ExamsService implements IExamsService {
         index: q.index,
         language: q.language,
         title: q.title,
+        files: files,
         alternatives: qAlternatives.map((alt) => {
           const baseAlternative: any = {
             id: alt.id,

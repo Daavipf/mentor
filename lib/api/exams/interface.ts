@@ -13,7 +13,7 @@ export interface IExamsRepository {
   getExam(id: string): Promise<Prisma.ExamsModel | null>;
   //getUserExams(userId: string): Promise<Prisma.ExamsModel[]>;
   getUserExams(userId: string, page: number, limit: number): Promise<GetUserExamsRepositoryResponse[]>;
-  getExamQuestions(examId: string): Promise<Prisma.QuestionsModel[]>;
+  getExamQuestions(examId: string): Promise<[Prisma.QuestionsModel[], Prisma.QuestionImagesModel[]]>;
   getExamQuestionsResults(examId: string): Promise<Prisma.QuestionsOnExamsModel[]>;
   getExamAreas(examId: string): Promise<Prisma.ExamAreasModel[]>;
   //markQuestion(examId: string, questionId: string, alternativeId: string): Promise<Prisma.QuestionsModel | null>;

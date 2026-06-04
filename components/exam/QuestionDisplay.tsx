@@ -26,11 +26,11 @@ export default function QuestionDisplay({
         </Badge>
       </div>
 
-      {/*question.title && <h4 style={{ margin: "0 0 10px 0", color: "#333" }}>{question.title}</h4>*/}
-
       {question.context && (
         <p style={{ whiteSpace: "pre-wrap", textAlign: "justify", marginBottom: "15px" }}>{question.context}</p>
       )}
+
+      {question.files && question.files.map((i) => <img key={i} src={i} />)}
 
       {question.alternativesIntroduction && (
         <p style={{ fontWeight: "bold", marginBottom: "15px" }}>{question.alternativesIntroduction}</p>
