@@ -7,6 +7,7 @@ const EXP_2_HOURS = 60 * 60 * 2;
 type jwtPayload = {
   email: string;
   userId: string;
+  name: string;
 };
 
 export function hashPassword(password: string): string {

@@ -16,7 +16,7 @@ export default class AuthService implements IAuthService {
 
     if (!verifyPassword(password, user.password)) throw new Error("Login ou senha inválidos");
 
-    const token = signJwt({ email: user.email, userId: user.id });
+    const token = signJwt({ email: user.email, userId: user.id, name: user.name });
 
     return token;
   }
@@ -30,7 +30,7 @@ export default class AuthService implements IAuthService {
 
     const hash = hashPassword(password);
     const createdUser = await this.usersRepository.createUser(name, email, hash);
-    const token = signJwt({ email: createdUser.email, userId: createdUser.id });
+    const token = signJwt({ email: createdUser.email, userId: createdUser.id, name: createdUser.name });
 
     return token;
   }
