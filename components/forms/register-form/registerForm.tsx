@@ -4,7 +4,7 @@ import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Mail, Eye, User } from "lucide-react";
-import SubmitButton from "../SubmitButton";
+import StateButton from "@/components/buttons/StateButton";
 
 export default function RegisterForm() {
   const [state, formAction] = useActionState(handleRegister, null);
@@ -41,7 +41,7 @@ export default function RegisterForm() {
           <Eye />
         </InputGroupAddon>
       </InputGroup>
-      <SubmitButton title="Entrar" alternative="Criando conta..." />
+      <StateButton type="submit" size="lg" title="Criar conta" alternative="Cadastrando..." />
     </form>
   );
 }

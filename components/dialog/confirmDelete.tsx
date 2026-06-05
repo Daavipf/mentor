@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { deleteExamAction } from "@/lib/api/exams/actions";
 
 import {
@@ -15,15 +16,35 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 export default function ConfirmDeleteDialog({ examId }: { examId: string }) {
-  async function handleDelete() {
-    const result = await deleteExamAction(examId);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
-    if (!result.success) {
-      toast.error(result.error);
+  async function handleDelete(e: React.MouseEvent) {
+    e.preventDefault();
+
+    setIsDeleting(true);
+
+    try {
+      const result = await deleteExamAction(examId);
+
+      if (!result.success) {
+        toast.error(result.error);
+      }
+    } catch (error) {
+      if (isRedirectError(error)) {
+        throw error;
+      }
+
+      console.error(error);
+      toast.error("Ocorreu um erro ao deletar a prova.");
+    } finally {
+      setIsDeleting(false);
     }
   }
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -35,8 +56,12 @@ export default function ConfirmDeleteDialog({ examId }: { examId: string }) {
           <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete}>Continuar</AlertDialogAction>
+          <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+
+          <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+            {isDeleting && <Spinner className="mr-2 h-4 w-4 animate-spin" />}
+            {isDeleting ? "Deletando..." : "Continuar"}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

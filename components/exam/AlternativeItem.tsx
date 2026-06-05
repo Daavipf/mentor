@@ -43,11 +43,7 @@ export default function AlternativeItem({ alternative, letter, isSelected, onSel
           {alternative.file && (
             <div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={alternative.file}
-                alt={`Alternativa ${letter}`}
-                className="w-20 h-20 object-contain rounded-md"
-              />
+              <img src={alternative.file} alt={`Alternativa ${letter}`} className="w-full object-contain rounded-md" />
             </div>
           )}
         </div>

@@ -51,11 +51,7 @@ export default function ResultAlternativeItem({ alternative, letter, isSelected 
 
           {alternative.file && (
             <div>
-              <img
-                src={alternative.file}
-                alt={`Alternativa ${letter}`}
-                className="max-w-50 max-h-50 object-contain rounded-md"
-              />
+              <img src={alternative.file} alt={`Alternativa ${letter}`} className="w-full object-contain rounded-md" />
             </div>
           )}
         </div>

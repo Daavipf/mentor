@@ -11,6 +11,10 @@ import { Plus } from "lucide-react";
 import AreaSelect from "./areaSelect";
 import SelectedAreaItem from "./selectedAreaItem";
 
+import { isRedirectError } from "next/dist/client/components/redirect-error";
+import StateButton from "@/components/buttons/StateButton";
+import { Spinner } from "@/components/ui/spinner";
+
 const MIN_QUESTIONS = 5;
 const MAX_QUESTIONS = 45;
 const MIN_YEAR = 2009;
@@ -33,6 +37,8 @@ export default function ExamsForm() {
 
   const [areaInput, setAreaInput] = useState<string>("");
   const [amountInput, setAmountInput] = useState<number>(MIN_QUESTIONS);
+
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const availableAreas = PREDEFINED_AREAS.filter((area) => !Object.keys(areas).includes(area));
 
@@ -70,18 +76,24 @@ export default function ExamsForm() {
       return;
     }
 
-    const payload: CreateExamPayload = {
-      title: title.trim(),
-      year: year === "" ? null : Number(year),
-      areas: areas,
-    };
+    try {
+      const payload: CreateExamPayload = {
+        title: title.trim(),
+        year: year === "" ? null : Number(year),
+        areas: areas,
+      };
 
-    await generateExamAction(payload);
+      await generateExamAction(payload);
+    } catch (error) {
+      if (isRedirectError(error)) throw error;
+
+      console.log(error);
+      toast.error("Ocorreu um erro ao gerar a prova.");
+    }
   };
 
   return (
     <form action={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      {/* Campos base do Exam (Title e Year) */}
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         <Input
           type="text"
@@ -89,6 +101,7 @@ export default function ExamsForm() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
+          disabled={isSubmitting}
         />
         <Input
           type="number"
@@ -97,12 +110,12 @@ export default function ExamsForm() {
           min={MIN_YEAR}
           max={MAX_YEAR}
           onChange={(e) => setYear(e.target.value === "" ? "" : Number(e.target.value))}
+          disabled={isSubmitting}
         />
       </div>
 
       <hr className="w-full border mt-2.5 mb-2.5" />
 
-      {/* Controles de Áreas e Quantidades */}
       <div className="flex gap-2.5 items-center">
         <AreaSelect areaInput={areaInput} setAreaInput={setAreaInput} availableAreas={availableAreas} />
 
@@ -112,19 +125,18 @@ export default function ExamsForm() {
           max={MAX_QUESTIONS}
           value={amountInput}
           onChange={(e) => setAmountInput(Number(e.target.value))}
-          disabled={availableAreas.length === 0}
+          disabled={availableAreas.length === 0 || isSubmitting}
         />
         <Button
           size="icon-lg"
           type="button"
           onClick={handleAddRequest}
-          disabled={availableAreas.length === 0 || !areaInput}
+          disabled={availableAreas.length === 0 || !areaInput || isSubmitting}
         >
           <Plus />
         </Button>
       </div>
 
-      {/* Lista de Áreas Solicitadas */}
       <ul style={{ listStyle: "none", padding: 0 }}>
         {Object.entries(areas).map(([area, amount]) => (
           <li key={area}>
@@ -133,10 +145,13 @@ export default function ExamsForm() {
         ))}
       </ul>
 
-      {/* Submit final */}
-      <Button size="lg" type="submit" disabled={Object.keys(areas).length === 0 || !title.trim()}>
-        Gerar Prova
-      </Button>
+      <StateButton
+        size="lg"
+        type="submit"
+        title="Gerar Prova"
+        alternative="Trabalhando..."
+        disabled={isSubmitting || Object.keys(areas).length === 0 || !title.trim()}
+      />
     </form>
   );
 }
