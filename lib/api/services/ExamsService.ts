@@ -1,0 +1,184 @@
+import { IExamsRepository } from "@/lib/api/domain/repositories/IExamsRepository";
+import { IQuestionsRepository } from "@/lib/api/domain/repositories/IQuestionsRepository";
+import { IHistoryRepository } from "@/lib/api/domain/repositories/IHistoryRepository";
+
+import { CreateExamPayload } from "@/lib/api/domain/types/dto/CreateExamPayload";
+import { ExamDTO } from "@/lib/api/domain/types/dto/ExamDTO";
+import { QuestionDTO } from "@/lib/api/domain/types/dto/QuestionDTO";
+import { ExamCardDTO } from "@/lib/api/domain/types/dto/ExamCardDTO";
+import { QuestionOnExam } from "@/lib/api/domain/types/entities/QuestionOnExam";
+import { AnswerPayload } from "@/lib/api/domain/types/AnswerPayload";
+import { Question } from "@/lib/api/domain/types/entities/Question";
+import { Alternative } from "@/lib/api/domain/types/entities/Alternative";
+import { QuestionImage } from "@/lib/api/domain/types/entities/QuestionImages";
+
+export default class ExamsService {
+  examsRepository: IExamsRepository;
+  questionsRepository: IQuestionsRepository;
+  historyRepository: IHistoryRepository;
+
+  constructor(
+    examsRepository: IExamsRepository,
+    questionsRepository: IQuestionsRepository,
+    historyRepository: IHistoryRepository,
+  ) {
+    this.examsRepository = examsRepository;
+    this.questionsRepository = questionsRepository;
+    this.historyRepository = historyRepository;
+  }
+
+  async createExam(examPayload: CreateExamPayload, userId: string): Promise<ExamDTO> {
+    const [exam, questions, alternatives] = await this.examsRepository.createExam(examPayload, userId);
+    const examAreas = Object.entries(examPayload).map(([area, _]) => area);
+
+    const questionsDTO: QuestionDTO[] = this.mapQuestionsToDTO(questions, alternatives);
+
+    return {
+      id: exam.id,
+      title: exam.title,
+      areas: examAreas,
+      date: exam.createdAt,
+      questions: questionsDTO,
+      userId,
+    };
+  }
+
+  async getUserExams(userId: string, page: number, limit: number): Promise<ExamCardDTO[]> {
+    const exams = await this.examsRepository.getUserExams(userId, page, limit);
+
+    return exams.map((e) => {
+      const hasAnswers = e.questions.some((q) => q.gotRight !== null);
+
+      const rightQuestions = hasAnswers ? e.questions.filter((q) => q.gotRight === true).length : null;
+
+      const finishedAt =
+        e.histories.length > 0 && e.histories[0].finishedAt ? e.histories[0].finishedAt.toISOString() : null;
+
+      return {
+        id: e.id,
+        title: e.title,
+        date: e.createdAt.toISOString(),
+        finishedAt: finishedAt,
+        areas: e.areas.map((a) => a.area),
+        questions: e.questions.length,
+        rightQuestions: rightQuestions,
+      };
+    });
+  }
+
+  async getExam(id: string): Promise<ExamDTO> {
+    const exam = await this.examsRepository.getExam(id);
+    if (!exam) throw new Error("Prova não encontada");
+
+    const [questions, questionsImages] = await this.examsRepository.getExamQuestions(exam.id);
+    const questionsIds = questions.map((q) => q.id);
+    const alternatives = await this.questionsRepository.getMultipleQuestionsAlternatives(questionsIds);
+    const examAreas = await this.examsRepository.getExamAreas(exam.id);
+    const questionsDTO: QuestionDTO[] = this.mapQuestionsToDTO(questions, alternatives, questionsImages);
+
+    return {
+      id: exam.id,
+      title: exam.title,
+      areas: examAreas.map((a) => a.area),
+      date: exam.createdAt,
+      questions: questionsDTO,
+      userId: exam.userId,
+    };
+  }
+
+  async getExamResults(id: string): Promise<[ExamDTO, QuestionOnExam[]]> {
+    const exam = await this.examsRepository.getExam(id);
+    if (!exam) throw new Error("Prova não encontada");
+
+    const [questions, questionsImages] = await this.examsRepository.getExamQuestions(exam.id);
+    const questionsIds = questions.map((q) => q.id);
+    const alternatives = await this.questionsRepository.getMultipleQuestionsAlternatives(questionsIds);
+    const examAreas = await this.examsRepository.getExamAreas(exam.id);
+    const questionsDTO: QuestionDTO[] = this.mapQuestionsToDTO(questions, alternatives, questionsImages, true);
+
+    const userSelectedAlternatives = await this.examsRepository.getExamQuestionsResults(exam.id);
+
+    return [
+      {
+        id: exam.id,
+        title: exam.title,
+        areas: examAreas.map((a) => a.area),
+        date: exam.createdAt,
+        questions: questionsDTO,
+        userId: exam.userId,
+      },
+      userSelectedAlternatives,
+    ];
+  }
+
+  async isExamComplete(examId: string): Promise<boolean> {
+    try {
+      const examHistory = await this.historyRepository.getExamHistory(examId);
+      if (!examHistory) return false;
+
+      return examHistory.finishedAt != null && examHistory.finishedAt < new Date();
+    } catch (error: any) {
+      console.error(error);
+      throw new Error(error.message);
+    }
+  }
+
+  async submitExam(examId: string, userId: string, answer: AnswerPayload[]): Promise<number> {
+    try {
+      const isComplete = await this.isExamComplete(examId);
+      if (isComplete) throw new Error("A prova já foi resolvida");
+
+      const score = await this.examsRepository.submitExam(examId, userId, answer);
+      return score;
+    } catch (error: any) {
+      console.error(error);
+      throw new Error(error.message);
+    }
+  }
+
+  private mapQuestionsToDTO(
+    questions: Question[],
+    alternatives: Alternative[],
+    questionsImages?: QuestionImage[],
+    includeResults: boolean = false,
+  ): QuestionDTO[] {
+    return questions.map((q) => {
+      const qAlternatives = alternatives.filter((a) => a.questionId === q.id);
+      const files = questionsImages ? questionsImages.filter((i) => i.questionId === q.id).map((i) => i.path) : [];
+
+      return {
+        id: q.id,
+        area: q.area,
+        alternativesIntroduction: q.alternativesIntroduction,
+        year: q.year,
+        context: q.context,
+        index: q.index,
+        language: q.language,
+        title: q.title,
+        files: files,
+        alternatives: qAlternatives.map((alt) => {
+          const baseAlternative: any = {
+            id: alt.id,
+            text: alt.text,
+            file: alt.file,
+          };
+
+          if (includeResults) {
+            baseAlternative.isCorrect = alt.isCorrect;
+          }
+
+          return baseAlternative;
+        }),
+      };
+    });
+  }
+
+  async deleteExam(examId: string, userId: string): Promise<boolean> {
+    try {
+      return this.examsRepository.deleteExam(examId, userId);
+    } catch (error: any) {
+      console.error(error);
+      throw new Error(error.message);
+    }
+  }
+}

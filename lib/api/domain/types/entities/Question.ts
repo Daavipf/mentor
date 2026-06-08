@@ -1,14 +1,14 @@
 import { BaseEntity } from "../BaseEntity";
 
 export interface Question extends BaseEntity {
-  title?: string;
+  title: string | null;
   index: number;
   area: string;
-  discipline?: string;
-  topics?: string[];
-  language?: string;
+  discipline: string | null;
+  topics: string[] | null;
+  language: string | null;
   year: number;
-  context?: string;
-  alternativesIntroduction?: string;
+  context: string | null;
+  alternativesIntroduction: string | null;
   files: string[];
 }
