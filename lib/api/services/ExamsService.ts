@@ -37,7 +37,7 @@ export default class ExamsService {
       id: exam.id,
       title: exam.title,
       areas: examAreas,
-      date: exam.createdAt,
+      date: exam.createdAt!,
       questions: questionsDTO,
       userId,
     };
@@ -80,7 +80,7 @@ export default class ExamsService {
       id: exam.id,
       title: exam.title,
       areas: examAreas.map((a) => a.area),
-      date: exam.createdAt,
+      date: exam.createdAt!,
       questions: questionsDTO,
       userId: exam.userId,
     };
@@ -103,7 +103,7 @@ export default class ExamsService {
         id: exam.id,
         title: exam.title,
         areas: examAreas.map((a) => a.area),
-        date: exam.createdAt,
+        date: exam.createdAt!,
         questions: questionsDTO,
         userId: exam.userId,
       },

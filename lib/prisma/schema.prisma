@@ -79,9 +79,9 @@ model Exams {
 }
 
 model ExamAreas {
-  id      String  @id @default(uuid())
-  exams   Exams?  @relation(fields: [examsId], references: [id], onDelete: Cascade)
-  examsId String?
+  id      String @id @default(uuid())
+  exams   Exams  @relation(fields: [examsId], references: [id], onDelete: Cascade)
+  examsId String
   area    String
 }
 

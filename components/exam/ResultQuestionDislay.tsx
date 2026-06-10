@@ -4,12 +4,13 @@ import { ExamDTO } from "@/lib/api/types/ExamDTO";
 import ResultAlternativeItem from "./ResultAlternativeItem";
 import { Prisma } from "@/lib/prisma/prisma/client";
 import { Badge } from "@/components/ui/badge";
+import { QuestionOnExam } from "@/lib/api/domain/types/entities/QuestionOnExam";
 
 type Question = NonNullable<ExamDTO["questions"]>[number];
 
 interface ResultQuestionDisplayProps {
   question: Question;
-  userAnswer?: Prisma.QuestionsOnExamsModel;
+  userAnswer?: QuestionOnExam;
 }
 
 export default function ResultQuestionDisplay({ question, userAnswer }: ResultQuestionDisplayProps) {
@@ -35,7 +36,7 @@ export default function ResultQuestionDisplay({ question, userAnswer }: ResultQu
         <p className="font-semibold mb-6 text-zinc-900 dark:text-zinc-100">{question.alternativesIntroduction}</p>
       )}
 
-      {userAnswer?.selectedAlternativeId === null && (
+      {userAnswer?.userSelectedAlternative === null && (
         <div className="p-4 mb-6 flex items-center gap-2 rounded-md bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-950/30 dark:text-amber-500 dark:border-amber-900">
           <span className="text-xl">⚠️</span>
           <span className="font-medium">Você deixou esta questão em branco.</span>
@@ -46,7 +47,7 @@ export default function ResultQuestionDisplay({ question, userAnswer }: ResultQu
         <div className="flex flex-col gap-3 mt-4">
           {question.alternatives.map((alt, index) => {
             const letter = String.fromCharCode(65 + index);
-            const isSelected = userAnswer?.selectedAlternativeId === alt.id;
+            const isSelected = userAnswer?.userSelectedAlternative === alt.id;
 
             return <ResultAlternativeItem key={alt.id} alternative={alt} letter={letter} isSelected={isSelected} />;
           })}

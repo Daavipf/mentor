@@ -6,12 +6,13 @@ import QuestionSelect from "./QuestionSelect";
 import ResultQuestionDisplay from "./ResultQuestionDislay";
 import { Prisma } from "@/lib/prisma/prisma/client";
 import ExamPaginationButtons from "./ExamPaginationButtons";
+import { QuestionOnExam } from "@/lib/api/domain/types/entities/QuestionOnExam";
 
 type Question = NonNullable<ExamDTO["questions"]>[number];
 
 interface ResultViewerProps {
   questions: Question[] | undefined;
-  userAnswers: Prisma.QuestionsOnExamsModel[];
+  userAnswers: QuestionOnExam[];
 }
 
 export default function ResultViewer({ questions, userAnswers }: ResultViewerProps) {
