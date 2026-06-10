@@ -1,6 +1,6 @@
 "use client";
 
-import { ExamDTO } from "@/lib/api/types/ExamDTO";
+import { ExamDTO } from "@/lib/api/domain/types/dto/ExamDTO";
 import AlternativeItem from "./AlternativeItem";
 import { Badge } from "../ui/badge";
 

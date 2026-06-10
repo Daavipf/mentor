@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { verifyJwt } from "@/lib/api/auth/util";
+import { verifyJwt } from "@/lib/api/services/AuthUtils";
 import { examsService } from "@/lib/api/main";
 
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ExamCard from "@/components/exam/ExamCard";
-import { ExamCardDTO } from "@/lib/api/types/ExamCardDTO";
+import { ExamCardDTO } from "@/lib/api/domain/types/dto/ExamCardDTO";
 
 export default async function ExamsListPage() {
   const cookieStore = await cookies();

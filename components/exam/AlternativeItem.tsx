@@ -1,6 +1,6 @@
 "use client";
 
-import { ExamDTO } from "@/lib/api/types/ExamDTO";
+import { ExamDTO } from "@/lib/api/domain/types/dto/ExamDTO";
 
 type Alternative = NonNullable<NonNullable<ExamDTO["questions"]>[number]["alternatives"]>[number];
 

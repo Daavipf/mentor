@@ -1,5 +1,5 @@
 "use client";
-import { handleRegister } from "@/lib/api/auth/actions";
+import { handleRegister } from "@/lib/api/actions/AuthActions";
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";

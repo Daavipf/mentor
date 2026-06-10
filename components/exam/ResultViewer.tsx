@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { ExamDTO } from "@/lib/api/types/ExamDTO";
+import { ExamDTO } from "@/lib/api/domain/types/dto/ExamDTO";
+import { QuestionOnExam } from "@/lib/api/domain/types/entities/QuestionOnExam";
 import QuestionSelect from "./QuestionSelect";
 import ResultQuestionDisplay from "./ResultQuestionDislay";
-import { Prisma } from "@/lib/prisma/prisma/client";
 import ExamPaginationButtons from "./ExamPaginationButtons";
-import { QuestionOnExam } from "@/lib/api/domain/types/entities/QuestionOnExam";
 
 type Question = NonNullable<ExamDTO["questions"]>[number];
 

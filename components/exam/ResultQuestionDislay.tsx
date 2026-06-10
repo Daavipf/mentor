@@ -1,10 +1,9 @@
 "use client";
 
-import { ExamDTO } from "@/lib/api/types/ExamDTO";
-import ResultAlternativeItem from "./ResultAlternativeItem";
-import { Prisma } from "@/lib/prisma/prisma/client";
-import { Badge } from "@/components/ui/badge";
+import { ExamDTO } from "@/lib/api/domain/types/dto/ExamDTO";
 import { QuestionOnExam } from "@/lib/api/domain/types/entities/QuestionOnExam";
+import ResultAlternativeItem from "./ResultAlternativeItem";
+import { Badge } from "@/components/ui/badge";
 
 type Question = NonNullable<ExamDTO["questions"]>[number];
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { deleteExamAction } from "@/lib/api/exams/actions";
+import { deleteExamAction } from "@/lib/api/actions/ExamActions";
 
 import {
   AlertDialog,
