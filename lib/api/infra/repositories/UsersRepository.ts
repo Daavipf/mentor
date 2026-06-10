@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from "@/lib/prisma/prisma/client";
-import { IUsersRepository } from "./interface";
+import { IUsersRepository } from "@/lib/api/domain/repositories/IUsersRepository";
+import { User } from "@/lib/api/domain/types/entities/User";
 
 export default class UsersRepository implements IUsersRepository {
   prisma: PrismaClient;
@@ -8,7 +9,7 @@ export default class UsersRepository implements IUsersRepository {
     this.prisma = prismaClient;
   }
 
-  async createUser(name: string, email: string, hashPassword: string): Promise<Prisma.UsersModel> {
+  async createUser(name: string, email: string, hashPassword: string): Promise<User> {
     try {
       return this.prisma.users.create({
         data: { name, email, password: hashPassword },
@@ -19,7 +20,7 @@ export default class UsersRepository implements IUsersRepository {
     }
   }
 
-  async findUserById(id: string): Promise<Prisma.UsersModel | null> {
+  async findUserById(id: string): Promise<User | null> {
     const user = await this.prisma.users.findFirst({
       where: { id },
     });
@@ -31,7 +32,7 @@ export default class UsersRepository implements IUsersRepository {
     return user;
   }
 
-  async findUserByEmail(email: string): Promise<Prisma.UsersModel | null> {
+  async findUserByEmail(email: string): Promise<User | null> {
     const user = await this.prisma.users.findFirst({
       where: { email },
     });

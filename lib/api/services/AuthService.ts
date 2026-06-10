@@ -1,8 +1,7 @@
-import { IUsersRepository } from "../users/interface";
-import { IAuthService } from "./interface";
-import { signJwt, verifyPassword, hashPassword } from "./util";
+import { IUsersRepository } from "@/lib/api/domain/repositories/IUsersRepository";
+import { signJwt, verifyPassword, hashPassword } from "./AuthUtils";
 
-export default class AuthService implements IAuthService {
+export default class AuthService {
   usersRepository: IUsersRepository;
 
   constructor(usersRepository: IUsersRepository) {

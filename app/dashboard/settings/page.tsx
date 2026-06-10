@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { handleLogout } from "@/lib/api/auth/actions";
+import { handleLogout } from "@/lib/api/actions/AuthActions";
 import { ThemeSwitch } from "@/components/theme/ThemeSwitch";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";

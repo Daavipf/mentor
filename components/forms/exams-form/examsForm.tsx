@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { generateExamAction } from "@/lib/api/exams/actions";
-import { CreateExamPayload } from "@/lib/api/types/CreateExamPayload";
+import { generateExamAction } from "@/lib/api/actions/ExamActions";
+import { CreateExamPayload } from "@/lib/api/domain/types/dto/CreateExamPayload";
 
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";

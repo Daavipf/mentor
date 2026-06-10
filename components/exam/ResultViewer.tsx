@@ -1,17 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { ExamDTO } from "@/lib/api/types/ExamDTO";
+import { ExamDTO } from "@/lib/api/domain/types/dto/ExamDTO";
+import { QuestionOnExam } from "@/lib/api/domain/types/entities/QuestionOnExam";
 import QuestionSelect from "./QuestionSelect";
 import ResultQuestionDisplay from "./ResultQuestionDislay";
-import { Prisma } from "@/lib/prisma/prisma/client";
 import ExamPaginationButtons from "./ExamPaginationButtons";
 
 type Question = NonNullable<ExamDTO["questions"]>[number];
 
 interface ResultViewerProps {
   questions: Question[] | undefined;
-  userAnswers: Prisma.QuestionsOnExamsModel[];
+  userAnswers: QuestionOnExam[];
 }
 
 export default function ResultViewer({ questions, userAnswers }: ResultViewerProps) {

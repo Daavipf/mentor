@@ -1,11 +1,11 @@
 import { cookies } from "next/headers";
-import { verifyJwt } from "@/lib/api/auth/util";
+import { verifyJwt } from "@/lib/api/services/AuthUtils";
 import Link from "next/link";
 
 import { User } from "lucide-react";
 import ExamCard from "@/components/exam/ExamCard";
 import { Button } from "@/components/ui/button";
-import { ExamCardDTO } from "@/lib/api/types/ExamCardDTO";
+import { ExamCardDTO } from "@/lib/api/domain/types/dto/ExamCardDTO";
 import { examsService } from "@/lib/api/main";
 
 export default async function DashboardPage() {

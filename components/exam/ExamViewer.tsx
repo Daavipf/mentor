@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ExamDTO } from "@/lib/api/types/ExamDTO";
-import { submitExamAction } from "@/lib/api/exams/actions";
-import { AnswerPayload } from "@/lib/api/types/AnswerPayload";
+import { ExamDTO } from "@/lib/api/domain/types/dto/ExamDTO";
+import { submitExamAction } from "@/lib/api/actions/ExamActions";
+import { AnswerPayload } from "@/lib/api/domain/types/AnswerPayload";
 
 import QuestionSelect from "./QuestionSelect";
 import ExamPaginationButtons from "./ExamPaginationButtons";

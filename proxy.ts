@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifyJwt } from "./lib/api/auth/util";
+import { verifyJwt } from "@/lib/api/services/AuthUtils";
 
 export function proxy(request: NextRequest) {
   const token = request.cookies.get("session")?.value;

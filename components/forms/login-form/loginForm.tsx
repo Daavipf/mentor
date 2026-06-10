@@ -1,5 +1,5 @@
 "use client";
-import { handleLogin } from "@/lib/api/auth/actions";
+import { handleLogin } from "@/lib/api/actions/AuthActions";
 import { useActionState, useEffect, useState } from "react";
 
 import { toast } from "sonner";

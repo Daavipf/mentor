@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
-import { verifyJwt } from "@/lib/api/auth/util";
+import { verifyJwt } from "@/lib/api/services/AuthUtils";
 import { examsService } from "@/lib/api/main";
 import Link from "next/link";
-import { ExamDTO } from "@/lib/api/types/ExamDTO";
+import { ExamDTO } from "@/lib/api/domain/types/dto/ExamDTO";
 import ExamViewer from "@/components/exam/ExamViewer";
 import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";

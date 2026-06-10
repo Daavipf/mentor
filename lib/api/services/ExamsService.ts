@@ -1,14 +1,18 @@
-import { Prisma } from "@/lib/prisma/prisma/client";
-import { AnswerPayload } from "@/lib/api/types/AnswerPayload";
-import { ExamDTO } from "@/lib/api/types/ExamDTO";
-import { QuestionDTO } from "@/lib/api/types/QuestionDTO";
-import { ExamCardDTO } from "@/lib/api/types/ExamCardDTO";
-import { IExamsRepository, IExamsService } from "./interface";
-import { IQuestionsRepository } from "@/lib/api/questions/interface";
-import { IHistoryRepository } from "@/lib/api/history/interface";
-import { CreateExamPayload } from "@/lib/api/types/CreateExamPayload";
+import { IExamsRepository } from "@/lib/api/domain/repositories/IExamsRepository";
+import { IQuestionsRepository } from "@/lib/api/domain/repositories/IQuestionsRepository";
+import { IHistoryRepository } from "@/lib/api/domain/repositories/IHistoryRepository";
 
-export default class ExamsService implements IExamsService {
+import { CreateExamPayload } from "@/lib/api/domain/types/dto/CreateExamPayload";
+import { ExamDTO } from "@/lib/api/domain/types/dto/ExamDTO";
+import { QuestionDTO } from "@/lib/api/domain/types/dto/QuestionDTO";
+import { ExamCardDTO } from "@/lib/api/domain/types/dto/ExamCardDTO";
+import { QuestionOnExam } from "@/lib/api/domain/types/entities/QuestionOnExam";
+import { AnswerPayload } from "@/lib/api/domain/types/AnswerPayload";
+import { Question } from "@/lib/api/domain/types/entities/Question";
+import { Alternative } from "@/lib/api/domain/types/entities/Alternative";
+import { QuestionImage } from "@/lib/api/domain/types/entities/QuestionImages";
+
+export default class ExamsService {
   examsRepository: IExamsRepository;
   questionsRepository: IQuestionsRepository;
   historyRepository: IHistoryRepository;
@@ -33,7 +37,7 @@ export default class ExamsService implements IExamsService {
       id: exam.id,
       title: exam.title,
       areas: examAreas,
-      date: exam.date,
+      date: exam.createdAt!,
       questions: questionsDTO,
       userId,
     };
@@ -76,13 +80,13 @@ export default class ExamsService implements IExamsService {
       id: exam.id,
       title: exam.title,
       areas: examAreas.map((a) => a.area),
-      date: exam.date,
+      date: exam.createdAt!,
       questions: questionsDTO,
       userId: exam.userId,
     };
   }
 
-  async getExamResults(id: string): Promise<[ExamDTO, Prisma.QuestionsOnExamsModel[]]> {
+  async getExamResults(id: string): Promise<[ExamDTO, QuestionOnExam[]]> {
     const exam = await this.examsRepository.getExam(id);
     if (!exam) throw new Error("Prova não encontada");
 
@@ -99,7 +103,7 @@ export default class ExamsService implements IExamsService {
         id: exam.id,
         title: exam.title,
         areas: examAreas.map((a) => a.area),
-        date: exam.date,
+        date: exam.createdAt!,
         questions: questionsDTO,
         userId: exam.userId,
       },
@@ -133,9 +137,9 @@ export default class ExamsService implements IExamsService {
   }
 
   private mapQuestionsToDTO(
-    questions: Prisma.QuestionsModel[],
-    alternatives: Prisma.AlternativesModel[],
-    questionsImages?: Prisma.QuestionImagesModel[],
+    questions: Question[],
+    alternatives: Alternative[],
+    questionsImages?: QuestionImage[],
     includeResults: boolean = false,
   ): QuestionDTO[] {
     return questions.map((q) => {
@@ -156,7 +160,7 @@ export default class ExamsService implements IExamsService {
           const baseAlternative: any = {
             id: alt.id,
             text: alt.text,
-            file: alt.imagePath,
+            file: alt.file,
           };
 
           if (includeResults) {

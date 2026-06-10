@@ -1,4 +1,4 @@
-import { ExamCardDTO } from "@/lib/api/types/ExamCardDTO";
+import { ExamCardDTO } from "@/lib/api/domain/types/dto/ExamCardDTO";
 import {
   Card,
   CardAction,

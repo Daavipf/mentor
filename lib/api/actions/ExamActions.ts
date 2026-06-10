@@ -3,7 +3,7 @@
 
 import { cookies } from "next/headers";
 import { examsService } from "../main";
-import { verifyJwt } from "../auth/util";
+import { verifyJwt } from "@/lib/api/services/AuthUtils";
 import { redirect } from "next/navigation";
 import { AnswerPayload } from "../types/AnswerPayload";
 import { revalidatePath } from "next/cache";
