@@ -5,9 +5,9 @@ import { cookies } from "next/headers";
 import { examsService } from "../main";
 import { verifyJwt } from "@/lib/api/services/AuthUtils";
 import { redirect } from "next/navigation";
-import { AnswerPayload } from "../types/AnswerPayload";
+import { AnswerPayload } from "@/lib/api/domain/types/AnswerPayload";
 import { revalidatePath } from "next/cache";
-import { CreateExamPayload } from "@/lib/api/types/CreateExamPayload";
+import { CreateExamPayload } from "@/lib/api/domain/types/dto/CreateExamPayload";
 
 export async function generateExamAction(requests: CreateExamPayload) {
   let examId: string;
