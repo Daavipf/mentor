@@ -11,15 +11,15 @@ import { examsService } from "@/lib/api/main";
 export default async function DashboardPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
-  const user = token ? verifyJwt(token) : null;
+  const userPayload = token ? verifyJwt(token) : null;
 
-  const exams: ExamCardDTO[] = await examsService.getUserExams(user.id, 1, 2);
+  const exams: ExamCardDTO[] = await examsService.getUserExams(userPayload.userId, 1, 2);
 
   return (
     <section className="h-full flex flex-col p-4 gap-6 bg-zinc-100 dark:bg-zinc-950">
       <div className="w-full flex justify-between">
         <h1 className="text-2xl">
-          Bem-vindo, <strong>{user?.name}</strong>!
+          Bem-vindo, <strong>{userPayload?.name}</strong>!
         </h1>
         <Link
           href="/dashboard/settings"

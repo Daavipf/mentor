@@ -13,7 +13,7 @@ export default async function ExamsListPage() {
   const token = cookieStore.get("session")?.value;
   const userPayload = token ? verifyJwt(token) : null;
 
-  const exams: ExamCardDTO[] = await examsService.getUserExams(userPayload.id, 1, 10);
+  const exams: ExamCardDTO[] = await examsService.getUserExams(userPayload.userId, 1, 10);
 
   return (
     <section className="h-full flex flex-col p-4 gap-6 bg-zinc-100 dark:bg-zinc-950">
