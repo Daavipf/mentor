@@ -11,13 +11,9 @@ import { ExamCardDTO } from "@/lib/api/domain/types/dto/ExamCardDTO";
 export default async function ExamsListPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
-  const payload = token ? verifyJwt(token) : null;
+  const userPayload = token ? verifyJwt(token) : null;
 
-  if (!payload || !payload.userId) {
-    return <div style={{ padding: "20px" }}>Houve um erro ao ver suas provas.</div>;
-  }
-
-  const exams: ExamCardDTO[] = await examsService.getUserExams(payload.userId, 1, 10);
+  const exams: ExamCardDTO[] = await examsService.getUserExams(userPayload.id, 1, 10);
 
   return (
     <section className="h-full flex flex-col p-4 gap-6 bg-zinc-100 dark:bg-zinc-950">

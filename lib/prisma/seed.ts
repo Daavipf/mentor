@@ -2,6 +2,7 @@ import "dotenv/config";
 import { prisma } from "@/lib/prisma/prisma";
 import { Prisma } from "./prisma/client";
 import { formatEnemUrl } from "@/util/formatEnemUrl";
+import { replaceMarkdownImageUrls } from "@/util/replaceMarkdownImageUrl";
 
 type APIResponse = {
   metadata: {
@@ -75,7 +76,7 @@ function mapQuestionPayload(question: Question): Prisma.QuestionsCreateInput {
   return {
     area: question.discipline,
     index: question.index,
-    context: question.context,
+    context: replaceMarkdownImageUrls(question.context, imagePathTemplate),
     alternativesIntroduction: question.alternativesIntroduction,
     year: question.year,
     language: question.language,

@@ -4,6 +4,7 @@ import { ExamDTO } from "@/lib/api/domain/types/dto/ExamDTO";
 import { QuestionOnExam } from "@/lib/api/domain/types/entities/QuestionOnExam";
 import ResultAlternativeItem from "./ResultAlternativeItem";
 import { Badge } from "@/components/ui/badge";
+import ReactMarkdown from "react-markdown";
 
 type Question = NonNullable<ExamDTO["questions"]>[number];
 
@@ -24,12 +25,22 @@ export default function ResultQuestionDisplay({ question, userAnswer }: ResultQu
       </div>
 
       {question.context && (
-        <p className="whitespace-pre-wrap text-justify mb-6 leading-relaxed text-zinc-800 dark:text-zinc-200">
+        // <p className="whitespace-pre-wrap text-justify mb-6 leading-relaxed text-zinc-800 dark:text-zinc-200">
+        //   {question.context}
+        // </p>
+        <ReactMarkdown
+          components={{
+            img: ({ src, alt }) => {
+              if (!src) return null;
+              return <img src={src} alt={alt || "Imagem da Questão"} />;
+            },
+          }}
+        >
           {question.context}
-        </p>
+        </ReactMarkdown>
       )}
 
-      {question.files && question.files.map((i) => <img key={i} src={i} />)}
+      {/*question.files && question.files.map((i) => <img key={i} src={i} />)*/}
 
       {question.alternativesIntroduction && (
         <p className="font-semibold mb-6 text-zinc-900 dark:text-zinc-100">{question.alternativesIntroduction}</p>
